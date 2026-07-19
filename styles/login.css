@@ -144,7 +144,6 @@ a:hover {
     font-size: 12px;
     padding: 4px 0;
     color: #ff666e;
-    display: none;
 }
 
 .btn-primary {
@@ -173,5 +172,4 @@ a:hover {
     position: absolute;
     left: calc(50% - 20px);
     top: calc(50% - 20px);
-    display: none;
 }
