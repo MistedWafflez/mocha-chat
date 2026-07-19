@@ -19,6 +19,13 @@ const friendsViewLayout = document.getElementById("friendsViewLayout");
 const friendsRosterBox = document.getElementById("friendsRosterBox");
 const friendsCountLabel = document.getElementById("friendsCountLabel");
 
+const logoutBtn = document.getElementById("logoutBtn");
+const openSettingsBtn = document.getElementById("openSettingsBtn");
+const closeSettingsBtn = document.getElementById("closeSettingsBtn");
+const settingsOverlay = document.getElementById("settingsOverlay");
+const settingsUsername = document.getElementById("settingsUsername");
+const settingsAvatar = document.getElementById("settingsAvatar");
+
 let currentChannelId = null;
 let stoatWS = null;
 let usersCache = {};
@@ -32,6 +39,15 @@ function assignText(element, value) {
 function scrollToBottom() {
     if (channelMessagesBox) {
         channelMessagesBox.scrollTop = channelMessagesBox.scrollHeight;
+    }
+}
+
+function dismissLoadingOverlay() {
+    if (loadingContainer && loadingContainer.style.display !== "none") {
+        loadingContainer.classList.add("fade-out");
+        setTimeout(() => {
+            loadingContainer.style.display = "none";
+        }, 400);
     }
 }
 
@@ -50,6 +66,35 @@ function parseUlidTimestamp(id) {
     
     const date = new Date(timestamp);
     return isNaN(date.getTime()) ? new Date() : date;
+}
+
+function handleLogout() {
+    if (stoatWS) {
+        stoatWS.close();
+    }
+    localStorage.removeItem("stoat_token");
+    localStorage.removeItem("my_user_id");
+    localStorage.removeItem("mocha_token");
+    localStorage.removeItem("mocha_user");
+    sessionStorage.clear();
+    window.location.href = "/login";
+}
+
+function toggleSettings(show) {
+    if (!settingsOverlay) return;
+    if (show) {
+        const myId = localStorage.getItem("my_user_id");
+        if (myId && usersCache[myId]) {
+            const me = usersCache[myId];
+            if (settingsUsername) settingsUsername.textContent = me.username;
+            if (settingsAvatar && me.avatar) {
+                settingsAvatar.style.backgroundImage = `url(${STOAT_AUTUMN}/avatars/${me.avatar._id})`;
+            }
+        }
+        settingsOverlay.classList.add("active");
+    } else {
+        settingsOverlay.classList.remove("active");
+    }
 }
 
 async function stoatFetch(endpoint, options = {}) {
@@ -79,12 +124,22 @@ async function getUserProfile(userId) {
 }
 
 async function initStoatClient() {
+    if (logoutBtn) logoutBtn.addEventListener("click", handleLogout);
+    if (openSettingsBtn) openSettingsBtn.addEventListener("click", () => toggleSettings(true));
+    if (closeSettingsBtn) closeSettingsBtn.addEventListener("click", () => toggleSettings(false));
+
+    document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && settingsOverlay?.classList.contains("active")) {
+            toggleSettings(false);
+        }
+    });
+
     if (!STOAT_TOKEN) {
         window.location.href = "/login";
         return;
     }
 
-    assignText(cLoadingText, "Fetching profile info...");
+    assignText(cLoadingText, "Verifying credentials...");
 
     const me = await stoatFetch("/users/@me");
     if (!me) {
@@ -102,13 +157,63 @@ async function initStoatClient() {
         profileNavigationButtom.style.backgroundImage = `url(${STOAT_AUTUMN}/avatars/${me.avatar._id})`;
     }
 
-    assignText(cLoadingText, "Loading channels...");
+    assignText(cLoadingText, "Loading direct messages...");
+    renderServerList([]); 
+
     const channels = await stoatFetch("/users/dms");
     await renderChannelList(channels || []);
 
+    assignText(cLoadingText, "Setting up dashboard...");
     await openFriendsDashboard();
 
+    assignText(cLoadingText, "Connecting to gateway...");
     connectToGateway();
+}
+
+function renderServerList(servers = []) {
+    const serverContainer = document.querySelector('.sidebar-servers');
+    if (!serverContainer) return;
+
+    let staticHTML = `
+        <button class="server-btn" onclick="openFriendsDashboard()" title="Home">
+            <img class="server-btn-img" src="/images/newLogo256.png" alt="Home">
+        </button>
+        <div class="sidebar-divider"></div>
+    `;
+
+    let serverButtonsHTML = '';
+
+    servers.forEach(server => {
+        const iconUrl = server.icon 
+            ? `${STOAT_AUTUMN}/icons/${server.icon._id}` 
+            : '/images/buffer40.gif';
+
+        const escapedName = (server.name || 'Server').replace(/'/g, "\\'");
+
+        serverButtonsHTML += `
+            <button class="server-btn" onclick="openServer('${server._id}', '${escapedName}')" title="${escapedName}">
+                <img class="server-btn-img" src="${iconUrl}" alt="${escapedName}">
+            </button>
+        `;
+    });
+
+    let secondDividerHTML = servers.length > 0 ? `<div class="sidebar-divider"></div>` : '';
+
+    let footerHTML = `
+        <button class="server-btn" title="Add Server"><img class="server-btn-img" src="/images/iconNew.png" alt="Add Server"></button>
+        <button class="server-btn" title="Explore"><img class="server-btn-img" src="/images/iconNav.png" alt="Explore"></button>
+    `;
+
+    serverContainer.innerHTML = staticHTML + serverButtonsHTML + secondDividerHTML + footerHTML;
+}
+
+async function openServer(serverId, serverName) {
+    if (activeChannelTitle) activeChannelTitle.textContent = serverName;
+    
+    const channels = await stoatFetch(`/servers/${serverId}/channels`);
+    if (channels) {
+        await renderChannelList(channels);
+    }
 }
 
 async function renderChannelList(channels) {
@@ -116,12 +221,20 @@ async function renderChannelList(channels) {
     let html = "";
     const myId = localStorage.getItem("my_user_id");
 
-    for (const channel of channels) {
+    const activeChannels = channels.filter(channel => {
+        if (channel.active === false) return false;
+        if (channel.channel_type === "Group" || channel.server) return true;
+        return channel.channel_type === "DirectMessage";
+    });
+
+    for (const channel of activeChannels) {
         let channelName = channel.name;
         let iconUrl = '/images/buffer40.gif';
+        const isDM = channel.channel_type === "DirectMessage" || channel.channel_type === "Group" || !channel.server;
 
         if (channel.channel_type === "DirectMessage" || (channel.recipients && channel.recipients.length === 2)) {
-            const otherUserId = channel.recipients.find(id => id !== myId);
+            let otherUserId = channel.recipients?.find(id => id !== myId) || channel.user;
+
             if (otherUserId) {
                 const profile = await getUserProfile(otherUserId);
                 if (profile) {
@@ -139,26 +252,40 @@ async function renderChannelList(channels) {
             if (!channelName) channelName = "Group Chat";
         }
 
-        if (!channelName) channelName = channel._id || "Unknown Chat";
+        if (!channelName) channelName = channel._id || "Chat";
         const escapedName = channelName.replace(/'/g, "\\'");
 
+        const closeBtnHTML = isDM ? `
+            <span class="close-channel-btn" onclick="closeChannel(event, '${channel._id}')" title="Close DM">✕</span>
+        ` : '';
+
         html += `
-            <button onclick="openChat('${channel._id}', '${escapedName}')" class="button2">
+            <button onclick="openChat('${channel._id}', '${escapedName}')" class="button2 channel-item-btn" data-channel-id="${channel._id}">
                 <div class="item-btn-avatar" style="background-image: url('${iconUrl}');"></div>
                 <div class="item-btn-label">${channelName}</div>
+                ${closeBtnHTML}
             </button>
         `;
     }
 
     chatsList.innerHTML = html;
-    
-    if (loadingContainer) {
-        setTimeout(() => {
-            loadingContainer.classList.add("fade-out");
-            setTimeout(() => {
-                loadingContainer.style.display = "none";
-            }, 400);
-        }, 300);
+}
+
+async function closeChannel(event, channelId) {
+    if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+    }
+
+    const btnToClose = document.querySelector(`[data-channel-id="${channelId}"]`);
+    if (btnToClose) {
+        btnToClose.remove();
+    }
+
+    await stoatFetch(`/channels/${channelId}`, { method: "DELETE" }).catch(() => {});
+
+    if (currentChannelId === channelId) {
+        openFriendsDashboard();
     }
 }
 
@@ -243,8 +370,10 @@ async function openFriendsDashboard() {
     let html = "";
 
     for (const channel of channels) {
+        if (channel.active === false) continue;
+
         if (channel.channel_type === "DirectMessage" || (channel.recipients && channel.recipients.length === 2)) {
-            const otherUserId = channel.recipients.find(id => id !== myId);
+            const otherUserId = channel.recipients?.find(id => id !== myId) || channel.user;
             if (otherUserId) {
                 connectionsFound++;
                 const profile = await getUserProfile(otherUserId);
@@ -348,7 +477,7 @@ async function appendMessageToFeed(data) {
         }
 
         cleanHTML = `
-            <div class="message-item system-notification" style="margin-top: 8px; margin-bottom: 8px; opacity: 0.75; font-size: 14px; padding-left: 72px;">
+            <div class="message-item system-notification" data-message-id="${data._id}" style="margin-top: 8px; margin-bottom: 8px; opacity: 0.75; font-size: 14px; padding-left: 72px;">
                 <span class="message-content" style="color: #949ba4;">${systemText}</span>
             </div>
         `;
@@ -380,7 +509,7 @@ async function appendMessageToFeed(data) {
 
     if (lastMessageAuthorId === data.author && lastMessageType === "user") {
         cleanHTML = `
-            <div class="message-item consecutive">
+            <div class="message-item consecutive" data-message-id="${data._id}">
                 <div class="message-consecutive-spacer">
                     <span class="message-hover-time">${timeString}</span>
                 </div>
@@ -400,7 +529,7 @@ async function appendMessageToFeed(data) {
             : '/images/buffer40.gif';
 
         cleanHTML = `
-            <div class="message-item">
+            <div class="message-item" data-message-id="${data._id}">
                 <div class="message-avatar" style="background-image: url('${avatarUrl}');"></div>
                 <div class="message-details">
                     <div class="message-header">
@@ -431,19 +560,94 @@ function connectToGateway() {
 
     stoatWS.onopen = () => {
         console.log("Connected to Stoat Gateway. Authenticating...");
+        assignText(cLoadingText, "Authenticating session...");
         stoatWS.send(JSON.stringify({ type: "Authenticate", token: STOAT_TOKEN }));
     };
 
     stoatWS.onmessage = async (event) => {
         const packet = JSON.parse(event.data);
+
         switch (packet.type) {
             case "Authenticated":
                 console.log("Successfully Authenticated with Gateway!");
+                assignText(cLoadingText, "Fetching servers & user state...");
                 break;
+
+            case "Ready":
+                console.log("Gateway Ready payload received:", packet);
+                
+                const serverCount = packet.servers ? packet.servers.length : 0;
+                assignText(cLoadingText, `Loaded ${serverCount} server${serverCount === 1 ? '' : 's'}! Finalizing...`);
+
+                if (packet.servers && Array.isArray(packet.servers)) {
+                    renderServerList(packet.servers);
+                }
+                if (packet.users && Array.isArray(packet.users)) {
+                    packet.users.forEach(u => { usersCache[u._id] = u; });
+                }
+
+                setTimeout(() => {
+                    dismissLoadingOverlay();
+                }, 300);
+                break;
+
             case "Message":
                 if (packet.channel === currentChannelId) {
                     appendMessageToFeed(packet);
+                } else {
+                    const updatedChannels = await stoatFetch("/users/dms");
+                    if (updatedChannels) await renderChannelList(updatedChannels);
                 }
+                break;
+
+            case "MessageUpdate":
+                if (packet.channel === currentChannelId) {
+                    const msgElement = document.querySelector(`[data-message-id="${packet.id}"]`);
+                    if (msgElement) {
+                        let contentElement = msgElement.querySelector('.message-content');
+                        if (!contentElement) {
+                            const detailsElement = msgElement.querySelector('.message-details');
+                            if (detailsElement) {
+                                contentElement = document.createElement('div');
+                                contentElement.className = 'message-content';
+                                detailsElement.insertBefore(contentElement, detailsElement.firstChild);
+                            }
+                        }
+                        if (contentElement && packet.data && packet.data.content !== undefined) {
+                            contentElement.textContent = packet.data.content;
+                            if (!msgElement.querySelector('.edited-tag')) {
+                                contentElement.insertAdjacentHTML('beforeend', ' <span class="edited-tag" style="font-size: 11px; color: #949ba4;">(edited)</span>');
+                            }
+                        }
+                    }
+                }
+                break;
+
+            case "MessageDelete":
+                if (packet.channel === currentChannelId) {
+                    const msgElement = document.querySelector(`[data-message-id="${packet.id}"]`);
+                    if (msgElement) {
+                        msgElement.remove();
+                    }
+                }
+                break;
+
+            case "BulkDelete":
+            case "MessageAppend":
+                if (packet.channel === currentChannelId && Array.isArray(packet.ids)) {
+                    packet.ids.forEach(id => {
+                        const msgElement = document.querySelector(`[data-message-id="${id}"]`);
+                        if (msgElement) msgElement.remove();
+                    });
+                }
+                break;
+
+            case "ChannelDelete":
+                if (packet.id === currentChannelId) {
+                    openFriendsDashboard();
+                }
+                const remainingChannels = await stoatFetch("/users/dms");
+                if (remainingChannels) await renderChannelList(remainingChannels);
                 break;
         }
     };
@@ -452,6 +656,8 @@ function connectToGateway() {
         console.warn("Disconnected from Stoat Gateway. Retrying in 5 seconds...");
         setTimeout(connectToGateway, 5000);
     };
+
+    setTimeout(dismissLoadingOverlay, 6000);
 }
 
 initStoatClient();

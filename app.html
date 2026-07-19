@@ -1,7 +1,8 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
+    <meta charset="UTF-8">
     <title>Mocha</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script>
@@ -22,12 +23,12 @@
 <body>
 
     <div class="sidebar-servers">
-        <button class="server-btn"><img class="server-btn-img" src="/images/newLogo256.png"></button>
+        <button class="server-btn"><img class="server-btn-img" src="/images/newLogo256.png" alt="Server Logo"></button>
         <div class="sidebar-divider"></div>
-        <button class="server-btn" style="display: none;"><img src="/images/buffer40.gif"
-                class="server-btn-img"></button>
-        <button class="server-btn"><img class="server-btn-img" src="/images/iconNew.png"></button>
-        <button class="server-btn"><img class="server-btn-img" src="/images/iconNav.png"></button>
+        <button class="server-btn" style="display: none;"><img src="/images/buffer40.gif" class="server-btn-img"
+                alt="Buffer"></button>
+        <button class="server-btn"><img class="server-btn-img" src="/images/iconNew.png" alt="Add Server"></button>
+        <button class="server-btn"><img class="server-btn-img" src="/images/iconNav.png" alt="Explore"></button>
     </div>
 
     <div class="sidebar-channels">
@@ -42,36 +43,57 @@
 
         <div class="channel-list-divider"></div>
 
-        <div id="chatsList" style="height: calc(100% - 160px); overflow-y: auto;"></div>
+        <div id="chatsList" class="chats-scroller"></div>
 
-        <div
-            style="width: 240px; height: 52px; position: absolute; bottom: 0; left: 0; background-color: #151311; display: flex; align-items: center; padding: 0 8px; justify-content: space-between; border-top: 1px solid rgba(255, 255, 255, 0.05);">
-            <div style="display: flex; align-items: center; gap: 8px; min-width: 0; flex-grow: 1;">
-                <button id="profileNavigationButtom"
-                    style="height: 32px; width: 32px; border-radius: 50%; background-image: url('/favicon.ico'); background-size: cover; background-position: center; flex-shrink: 0; position: relative;">
-                    <div
-                        style="position: absolute; width: 14px; height: 14px; bottom: -2px; right: -2px; background-color: #232428; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-                        <div id="statusIndicatorCircle"
-                            style="height: 10px; width: 10px; background-color: #23a55a; border-radius: 50%;"></div>
+        <div class="user-panel">
+            <div class="user-info">
+                <button id="profileNavigationButtom" class="user-avatar-btn">
+                    <div class="user-status-wrapper">
+                        <div id="statusIndicatorCircle" class="user-status-dot"></div>
                     </div>
                 </button>
-                <div style="display: flex; flex-direction: column; min-width: 0;">
-                    <div id="displayNameDisplay"
-                        style="font-size: 13px; font-weight: 600; color: #f2f3f5; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; line-height: 1.2;">
-                        Username</div>
-                    <div id="statusDisplay" style="font-size: 11px; color: #949ba4; line-height: 1.2;">Online</div>
+                <div class="user-text-details">
+                    <div id="displayNameDisplay" class="user-display-name">Username</div>
+                    <div id="statusDisplay" class="user-status-subtext">Online</div>
                 </div>
             </div>
-            <div style="display: flex; items-center: center; gap: 2px; flex-shrink: 0;">
-                <button
-                    style="height: 32px; width: 32px; display: flex; align-items: center; justify-content: center; border-radius: 4px;"><img
-                        src="/images/iconMic.png" style="width: 20px; height: 20px; opacity: 0.8;"></button>
-                <button
-                    style="height: 32px; width: 32px; display: flex; align-items: center; justify-content: center; border-radius: 4px;"><img
-                        src="/images/iconHeadphones.png" style="width: 20px; height: 20px; opacity: 0.8;"></button>
-                <button
-                    style="height: 32px; width: 32px; display: flex; align-items: center; justify-content: center; border-radius: 4px;"><img
-                        src="/images/iconSettings.png" style="width: 20px; height: 20px; opacity: 0.8;"></button>
+
+            <div class="user-controls">
+                <button class="user-control-btn" title="Mute"><img src="/images/iconMic.png" alt="Mute"></button>
+                <button class="user-control-btn" title="Deafen"><img src="/images/iconHeadphones.png"
+                        alt="Deafen"></button>
+                <button id="openSettingsBtn" class="user-control-btn" title="Settings"><img
+                        src="/images/iconSettings.png" alt="Settings"></button>
+            </div>
+        </div>
+
+        <div id="settingsOverlay" class="settings-overlay">
+            <div class="settings-modal">
+                <div class="settings-sidebar">
+                    <div class="settings-menu-header">User Settings</div>
+                    <button class="settings-nav-item active">My Account</button>
+                    <div class="settings-divider"></div>
+                    <button id="logoutBtn" class="settings-nav-item btn-danger">
+                        Log Out
+                    </button>
+                </div>
+
+                <div class="settings-content">
+                    <div class="settings-header">
+                        <h2>My Account</h2>
+                        <button id="closeSettingsBtn" class="close-settings-btn" title="Close Settings (Esc)">✕</button>
+                    </div>
+
+                    <div class="settings-card">
+                        <div class="settings-user-header">
+                            <div id="settingsAvatar" class="settings-avatar"></div>
+                            <div class="settings-user-info">
+                                <span id="settingsUsername" class="settings-username">Username</span>
+                                <span class="settings-subtext">Mocha Member</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -92,17 +114,14 @@
             </div>
         </div>
 
-        <div id="friendsViewLayout" style="display: block; padding: 24px; height: 100%; overflow-y: auto;">
-            <h2 style="margin: 0 0 16px 0; font-size: 20px; color: #fff; font-weight: 600;">Friends</h2>
-            <div style="color: #949ba4; font-size: 15px; margin-bottom: 24px;">Your direct networking dashboard
-                framework.</div>
+        <div id="friendsViewLayout" class="friends-dashboard">
+            <h2 class="friends-title">Friends</h2>
+            <div class="friends-subtitle">Your direct networking dashboard framework.</div>
 
-            <div
-                style="border-bottom: 1px solid #35363c; padding-bottom: 8px; margin-bottom: 16px; font-size: 12px; font-weight: 700; color: #949ba4; text-transform: uppercase; letter-spacing: 0.25px;">
+            <div class="friends-roster-header">
                 All Friends — <span id="friendsCountLabel">0</span>
             </div>
-            <div id="friendsRosterBox" style="display: flex; flex-direction: column; gap: 8px;">
-            </div>
+            <div id="friendsRosterBox" class="friends-roster-box"></div>
         </div>
 
     </div>
@@ -113,10 +132,10 @@
     </div>
 
     <div id="loadingContainer" class="loading-overlay">
-        <img id="cLoadingIcon" src="/images/buffer120.gif" class="loading-icon">
+        <img id="cLoadingIcon" src="/images/buffer120.gif" class="loading-icon" alt="Loading...">
         <div id="cLoadingText" class="loading-text">Waiting</div>
     </div>
-    
+
     <script src="/scripts/app.js"></script>
 </body>
 
