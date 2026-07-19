@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Mocha</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+        if (!window.console) {
+            window.console = { log: function () { } };
+        }
+    </script>
+
+    <link rel="stylesheet" href="/styles/app.css">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&amp;display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+
+    <div class="sidebar-servers">
+        <button class="server-btn"><img class="server-btn-img" src="/images/newLogo256.png"></button>
+        <div class="sidebar-divider"></div>
+        <button class="server-btn" style="display: none;"><img src="/images/buffer40.gif"
+                class="server-btn-img"></button>
+        <button class="server-btn"><img class="server-btn-img" src="/images/iconNew.png"></button>
+        <button class="server-btn"><img class="server-btn-img" src="/images/iconNav.png"></button>
+    </div>
+
+    <div class="sidebar-channels">
+        <div class="search-container">
+            <input class="search-input" placeholder="Find or start a conversation">
+        </div>
+
+        <button class="button2 button2-small" onclick="openFriendsDashboard()">
+            <div class="friends-icon"></div>
+            <div class="friends-text">Friends</div>
+        </button>
+
+        <div class="channel-list-divider"></div>
+
+        <div id="chatsList" style="height: calc(100% - 160px); overflow-y: auto;"></div>
+
+        <div
+            style="width: 240px; height: 52px; position: absolute; bottom: 0; left: 0; background-color: #151311; display: flex; align-items: center; padding: 0 8px; justify-content: space-between; border-top: 1px solid rgba(255, 255, 255, 0.05);">
+            <div style="display: flex; align-items: center; gap: 8px; min-width: 0; flex-grow: 1;">
+                <button id="profileNavigationButtom"
+                    style="height: 32px; width: 32px; border-radius: 50%; background-image: url('/favicon.ico'); background-size: cover; background-position: center; flex-shrink: 0; position: relative;">
+                    <div
+                        style="position: absolute; width: 14px; height: 14px; bottom: -2px; right: -2px; background-color: #232428; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                        <div id="statusIndicatorCircle"
+                            style="height: 10px; width: 10px; background-color: #23a55a; border-radius: 50%;"></div>
+                    </div>
+                </button>
+                <div style="display: flex; flex-direction: column; min-width: 0;">
+                    <div id="displayNameDisplay"
+                        style="font-size: 13px; font-weight: 600; color: #f2f3f5; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; line-height: 1.2;">
+                        Username</div>
+                    <div id="statusDisplay" style="font-size: 11px; color: #949ba4; line-height: 1.2;">Online</div>
+                </div>
+            </div>
+            <div style="display: flex; items-center: center; gap: 2px; flex-shrink: 0;">
+                <button
+                    style="height: 32px; width: 32px; display: flex; align-items: center; justify-content: center; border-radius: 4px;"><img
+                        src="/images/iconMic.png" style="width: 20px; height: 20px; opacity: 0.8;"></button>
+                <button
+                    style="height: 32px; width: 32px; display: flex; align-items: center; justify-content: center; border-radius: 4px;"><img
+                        src="/images/iconHeadphones.png" style="width: 20px; height: 20px; opacity: 0.8;"></button>
+                <button
+                    style="height: 32px; width: 32px; display: flex; align-items: center; justify-content: center; border-radius: 4px;"><img
+                        src="/images/iconSettings.png" style="width: 20px; height: 20px; opacity: 0.8;"></button>
+            </div>
+        </div>
+    </div>
+
+    <div class="chat-header-bar">
+        <div class="chat-header-border-primary"></div>
+        <div class="chat-header-icon"></div>
+        <div id="activeChannelTitle" class="chat-header-title">Select a conversation</div>
+    </div>
+
+    <div id="messageChannelBox" class="center-chat-panel">
+
+        <div id="activeChatLayout" style="display: none; height: 100%; position: relative; width: 100%;">
+            <div id="channelMessagesBox" class="messages-scroller"></div>
+            <div id="messageInputBar" class="message-input-bar">
+                <button id="channelAttachmentButton" class="attachment-btn"></button>
+                <input id="channelTextInput" placeholder="Message..." class="chat-text-input">
+            </div>
+        </div>
+
+        <div id="friendsViewLayout" style="display: block; padding: 24px; height: 100%; overflow-y: auto;">
+            <h2 style="margin: 0 0 16px 0; font-size: 20px; color: #fff; font-weight: 600;">Friends</h2>
+            <div style="color: #949ba4; font-size: 15px; margin-bottom: 24px;">Your direct networking dashboard
+                framework.</div>
+
+            <div
+                style="border-bottom: 1px solid #35363c; padding-bottom: 8px; margin-bottom: 16px; font-size: 12px; font-weight: 700; color: #949ba4; text-transform: uppercase; letter-spacing: 0.25px;">
+                All Friends — <span id="friendsCountLabel">0</span>
+            </div>
+            <div id="friendsRosterBox" style="display: flex; flex-direction: column; gap: 8px;">
+            </div>
+        </div>
+
+    </div>
+
+    <div class="sidebar-members">
+        <div class="members-header-label">Members</div>
+        <div id="memberBoard"></div>
+    </div>
+
+    <div id="loadingContainer" class="loading-overlay">
+        <img id="cLoadingIcon" src="/images/buffer120.gif" class="loading-icon">
+        <div id="cLoadingText" class="loading-text">Waiting</div>
+    </div>
+    
+    <script src="/scripts/app.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Mocha — Login</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/styles/login.css">
+
+    <script>
+        // Prevent console errors in legacy browser environments
+        if (!window.console) {
+            window.console = { log: function () {} };
+        }
+
+        // Redirect immediately if active token exists
+        if (localStorage.getItem("stoat_token")) {
+            window.location.replace("app.html");
+        }
+    </script>
+</head>
+
+<body>
+
+    <header class="top-nav-wrapper">
+        <div class="top-nav-inner">
+            <div class="brand-logo">Mocha</div>
+        </div>
+    </header>
+
+    <main class="login-card">
+        <div id="loginContainer">
+            <div class="login-title">Welcome back!</div>
+            <div class="login-subtitle">Glad to see you around!</div>
+
+            <div class="form-group">
+                <div class="form-label">USERNAME</div>
+                <input id="usernameInput" class="form-input" type="text" autocomplete="username" />
+                <div id="loginStatusMessage" class="status-message"></div>
+            </div>
+
+            <div class="form-group tight">
+                <div class="form-label">PASSWORD</div>
+                <input id="passwordInput" class="form-input" type="password" autocomplete="current-password" />
+                <div class="sub-link-text">
+                    <a href="forgotPassword.html">Forgot your password?</a>
+                </div>
+            </div>
+
+            <div class="form-group actions">
+                <button id="loginButton" class="btn-primary" onclick="submitlogin()">Login</button>
+                <div class="footer-text">
+                    Need an account? <a href="register.html">Register</a>
+                </div>
+            </div>
+        </div>
+
+        <img id="loginLoadingicon" class="loading-spinner-icon" src="/images/buffer120.gif" width="40" height="40" alt="Loading..." />
+    </main>
+
+    <script src="/scripts/login.js"></script>
+
+</body>
+</html>

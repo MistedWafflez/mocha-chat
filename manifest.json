@@ -1,0 +1,17 @@
+{
+  "name": "Mocha",
+  "short_name": "Mocha",
+  "description": "Mocha Chat & Community Framework",
+  "start_url": "/app.html",
+  "display": "standalone",
+  "background_color": "#12100e",
+  "theme_color": "#ba8c63",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "64x64",
+      "type": "image/x-icon"
+    }
+  ]
+}
