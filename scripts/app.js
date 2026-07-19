@@ -660,4 +660,4 @@ function connectToGateway() {
     setTimeout(dismissLoadingOverlay, 6000);
 }
 
-initStoatClient();
+initStoatClient(); // hi!
