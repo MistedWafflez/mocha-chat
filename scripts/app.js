@@ -248,6 +248,9 @@ function renderServerList(servers = []) {
         <button class="server-btn" onclick="openFriendsDashboard()" title="Home">
             <img class="server-btn-img" src="/images/newLogo256.png" alt="Home">
         </button>
+        <a class="server-btn" title="Home" href="//mistedwafflez.com">
+            <img class="server-btn-img" alt="Home" src="//mistedwafflez.com/pfp.jpg">
+        </a>
         <div class="sidebar-divider"></div>
     `;
 
