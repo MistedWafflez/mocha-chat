@@ -30,7 +30,7 @@ let currentChannelId = null;
 let stoatWS = null;
 let usersCache = {};
 let lastMessageAuthorId = null;
-let lastMessageType = null; 
+let lastMessageType = null;
 
 function assignText(element, value) {
     if (element) element.textContent = value;
@@ -56,14 +56,14 @@ function parseUlidTimestamp(id) {
     const alphabet = "0123456789ABCDEFGHJKMNPQRSTVWXYZ";
     const timePart = id.substring(0, 8).toUpperCase();
     let timestamp = 0;
-    
+
     for (let i = 0; i < timePart.length; i++) {
         const char = timePart[i];
         const value = alphabet.indexOf(char);
-        if (value === -1) return new Date(); 
+        if (value === -1) return new Date();
         timestamp = (timestamp * 32) + value;
     }
-    
+
     const date = new Date(timestamp);
     return isNaN(date.getTime()) ? new Date() : date;
 }
@@ -158,7 +158,7 @@ async function initStoatClient() {
     }
 
     assignText(cLoadingText, "Loading direct messages...");
-    renderServerList([]); 
+    renderServerList([]);
 
     const channels = await stoatFetch("/users/dms");
     await renderChannelList(channels || []);
@@ -184,8 +184,8 @@ function renderServerList(servers = []) {
     let serverButtonsHTML = '';
 
     servers.forEach(server => {
-        const iconUrl = server.icon 
-            ? `${STOAT_AUTUMN}/icons/${server.icon._id}` 
+        const iconUrl = server.icon
+            ? `${STOAT_AUTUMN}/icons/${server.icon._id}`
             : '/images/buffer40.gif';
 
         const escapedName = (server.name || 'Server').replace(/'/g, "\\'");
@@ -209,7 +209,7 @@ function renderServerList(servers = []) {
 
 async function openServer(serverId, serverName) {
     if (activeChannelTitle) activeChannelTitle.textContent = serverName;
-    
+
     const channels = await stoatFetch(`/servers/${serverId}/channels`);
     if (channels) {
         await renderChannelList(channels);
@@ -282,7 +282,7 @@ async function closeChannel(event, channelId) {
         btnToClose.remove();
     }
 
-    await stoatFetch(`/channels/${channelId}`, { method: "DELETE" }).catch(() => {});
+    await stoatFetch(`/channels/${channelId}`, { method: "DELETE" }).catch(() => { });
 
     if (currentChannelId === channelId) {
         openFriendsDashboard();
@@ -426,7 +426,7 @@ async function openChat(channelId, name) {
     document.querySelectorAll('.sidebar-channels .button2').forEach(btn => {
         btn.classList.remove('active-channel');
     });
-    
+
     const clickedElement = window.event?.currentTarget;
     if (clickedElement && clickedElement.tagName === 'BUTTON') {
         clickedElement.classList.add('active-channel');
@@ -435,7 +435,7 @@ async function openChat(channelId, name) {
     const history = await stoatFetch(`/channels/${channelId}/messages`);
     if (history) {
         const messages = Array.isArray(history) ? history : (history.messages || []);
-        
+
         lastMessageAuthorId = null;
         lastMessageType = null;
 
@@ -477,11 +477,11 @@ async function appendMessageToFeed(data) {
         }
 
         cleanHTML = `
-            <div class="message-item system-notification" data-message-id="${data._id}" style="margin-top: 8px; margin-bottom: 8px; opacity: 0.75; font-size: 14px; padding-left: 72px;">
+            <div class="message-item system-notification" data-message-id="${data._id}" data-author-id="${data.author}" style="margin-top: 8px; margin-bottom: 8px; opacity: 0.75; font-size: 14px; padding-left: 72px;">
                 <span class="message-content" style="color: #949ba4;">${systemText}</span>
             </div>
         `;
-        lastMessageAuthorId = null; 
+        lastMessageAuthorId = null;
         lastMessageType = "system";
         channelMessagesBox.insertAdjacentHTML('beforeend', cleanHTML);
         scrollToBottom();
@@ -509,7 +509,7 @@ async function appendMessageToFeed(data) {
 
     if (lastMessageAuthorId === data.author && lastMessageType === "user") {
         cleanHTML = `
-            <div class="message-item consecutive" data-message-id="${data._id}">
+            <div class="message-item consecutive" data-message-id="${data._id}" data-author-id="${data.author}">
                 <div class="message-consecutive-spacer">
                     <span class="message-hover-time">${timeString}</span>
                 </div>
@@ -523,13 +523,13 @@ async function appendMessageToFeed(data) {
         if (!usersCache[data.author]) await getUserProfile(data.author);
         const authorProfile = usersCache[data.author];
         const authorName = authorProfile?.username || data.author;
-        
-        const avatarUrl = (authorProfile && authorProfile.avatar) 
-            ? `${STOAT_AUTUMN}/avatars/${authorProfile.avatar._id}` 
+
+        const avatarUrl = (authorProfile && authorProfile.avatar)
+            ? `${STOAT_AUTUMN}/avatars/${authorProfile.avatar._id}`
             : '/images/buffer40.gif';
 
         cleanHTML = `
-            <div class="message-item" data-message-id="${data._id}">
+            <div class="message-item" data-message-id="${data._id}" data-author-id="${data.author}">
                 <div class="message-avatar" style="background-image: url('${avatarUrl}');"></div>
                 <div class="message-details">
                     <div class="message-header">
@@ -542,7 +542,7 @@ async function appendMessageToFeed(data) {
             </div>
         `;
     }
-    
+
     lastMessageAuthorId = data.author;
     lastMessageType = "user";
     channelMessagesBox.insertAdjacentHTML('beforeend', cleanHTML);
@@ -575,7 +575,7 @@ function connectToGateway() {
 
             case "Ready":
                 console.log("Gateway Ready payload received:", packet);
-                
+
                 const serverCount = packet.servers ? packet.servers.length : 0;
                 assignText(cLoadingText, `Loaded ${serverCount} server${serverCount === 1 ? '' : 's'}! Finalizing...`);
 
@@ -660,4 +660,169 @@ function connectToGateway() {
     setTimeout(dismissLoadingOverlay, 6000);
 }
 
-initStoatClient(); // hi!
+// Context Menu Rendering Logic
+function showContextMenu(x, y, items) {
+    const menuEl = document.getElementById("contextMenu");
+    if (!menuEl) return;
+
+    let html = "";
+    items.forEach(item => {
+        if (item.type === "divider") {
+            html += `<div class="context-menu-divider"></div>`;
+        } else {
+            const dangerClass = item.danger ? "danger" : "";
+            html += `
+                <div class="context-menu-item ${dangerClass}" onclick="${item.action}">
+                    ${item.label}
+                </div>
+            `;
+        }
+    });
+
+    menuEl.innerHTML = html;
+    menuEl.style.display = "flex";
+
+    const menuWidth = menuEl.offsetWidth || 170;
+    const menuHeight = menuEl.offsetHeight || 120;
+    const posX = x + menuWidth > window.innerWidth ? x - menuWidth : x;
+    const posY = y + menuHeight > window.innerHeight ? y - menuHeight : y;
+
+    menuEl.style.left = `${posX}px`;
+    menuEl.style.top = `${posY}px`;
+}
+
+function hideContextMenu() {
+    const menuEl = document.getElementById("contextMenu");
+    if (menuEl) menuEl.style.display = "none";
+}
+
+async function copyMessageContent(msgId) {
+    hideContextMenu();
+    const msgElem = document.querySelector(`[data-message-id="${msgId}"] .message-content`);
+    if (msgElem) {
+        await navigator.clipboard.writeText(msgElem.innerText.replace(" (edited)", ""));
+    }
+}
+
+async function copyMessageId(msgId) {
+    hideContextMenu();
+    await navigator.clipboard.writeText(msgId);
+}
+
+// Modal Helper Functions
+function closeCustomModal() {
+    const modalOverlay = document.getElementById("customModalOverlay");
+    if (modalOverlay) modalOverlay.style.display = "none";
+}
+
+// Global listener to close modal on Escape
+document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeCustomModal();
+});
+
+// Custom Edit Message Modal
+function promptEditMessage(msgId) {
+    hideContextMenu();
+    const msgElem = document.querySelector(`[data-message-id="${msgId}"] .message-content`);
+    if (!msgElem) return;
+
+    const currentText = msgElem.innerText.replace(" (edited)", "");
+
+    const modalOverlay = document.getElementById("customModalOverlay");
+    const modalTitle = document.getElementById("modalTitle");
+    const modalBody = document.getElementById("modalBody");
+    const modalActions = document.getElementById("modalActions");
+
+    modalTitle.textContent = "Edit Message";
+    modalBody.innerHTML = `
+        <div>Modify your message below:</div>
+        <input type="text" id="modalEditInput" class="modal-input" value="${currentText.replace(/"/g, '&quot;')}">
+    `;
+
+    modalActions.innerHTML = `
+        <button class="modal-btn modal-btn-secondary" onclick="closeCustomModal()">Cancel</button>
+        <button class="modal-btn modal-btn-primary" id="confirmEditBtn">Save Changes</button>
+    `;
+
+    modalOverlay.style.display = "flex";
+
+    const editInput = document.getElementById("modalEditInput");
+    editInput.focus();
+    editInput.select();
+
+    const saveEdit = async () => {
+        const newText = editInput.value.trim();
+        closeCustomModal();
+        if (newText && newText !== currentText) {
+            await stoatFetch(`/channels/${currentChannelId}/messages/${msgId}`, {
+                method: "PATCH",
+                body: JSON.stringify({ content: newText })
+            });
+        }
+    };
+
+    document.getElementById("confirmEditBtn").onclick = saveEdit;
+    editInput.onkeydown = (e) => {
+        if (e.key === "Enter") saveEdit();
+    };
+}
+
+// Custom Delete Message Confirmation Modal
+function deleteMessageAction(msgId) {
+    hideContextMenu();
+
+    const modalOverlay = document.getElementById("customModalOverlay");
+    const modalTitle = document.getElementById("modalTitle");
+    const modalBody = document.getElementById("modalBody");
+    const modalActions = document.getElementById("modalActions");
+
+    modalTitle.textContent = "Delete Message";
+    modalBody.innerHTML = `Are you sure you want to delete this message? This action cannot be undone.`;
+
+    modalActions.innerHTML = `
+        <button class="modal-btn modal-btn-secondary" onclick="closeCustomModal()">Cancel</button>
+        <button class="modal-btn modal-btn-danger" id="confirmDeleteBtn">Delete</button>
+    `;
+
+    modalOverlay.style.display = "flex";
+
+    document.getElementById("confirmDeleteBtn").onclick = async () => {
+        closeCustomModal();
+        await stoatFetch(`/channels/${currentChannelId}/messages/${msgId}`, {
+            method: "DELETE"
+        });
+    };
+}
+
+// Listener for Right-Click Context Menu on Messages
+document.addEventListener("contextmenu", (e) => {
+    const messageItem = e.target.closest(".message-item");
+    if (messageItem && currentChannelId) {
+        e.preventDefault();
+        const msgId = messageItem.dataset.messageId;
+        const authorId = messageItem.dataset.authorId;
+        const myId = localStorage.getItem("my_user_id");
+
+        const isMyMessage = authorId === myId;
+
+        const menuItems = [
+            { label: "Copy Text", action: `copyMessageContent('${msgId}')` },
+            { label: "Copy Message ID", action: `copyMessageId('${msgId}')` }
+        ];
+
+        if (isMyMessage) {
+            menuItems.push({ type: "divider" });
+            menuItems.push({ label: "Edit Message", action: `promptEditMessage('${msgId}')` });
+            menuItems.push({ label: "Delete Message", action: `deleteMessageAction('${msgId}')`, danger: true });
+        }
+
+        showContextMenu(e.clientX, e.clientY, menuItems);
+    } else {
+        hideContextMenu();
+    }
+});
+
+// Hide menu on left-click anywhere
+document.addEventListener("click", () => hideContextMenu());
+
+initStoatClient();
