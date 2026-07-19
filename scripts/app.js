@@ -1,10 +1,8 @@
-// ====== 1. Configuration ======
 const STOAT_API_URL = "https://api.revolt.chat";
 const STOAT_WS_URL = "wss://ws.revolt.chat?format=json";
 const STOAT_AUTUMN = "https://autumn.revolt.chat";
 const STOAT_TOKEN = localStorage.getItem("stoat_token");
 
-// ====== 2. DOM Elements ======
 const loadingContainer = document.getElementById("loadingContainer");
 const cLoadingText = document.getElementById("cLoadingText");
 const displayNameDisplay = document.getElementById("displayNameDisplay");
@@ -16,20 +14,17 @@ const channelTextInput = document.getElementById("channelTextInput");
 const memberBoard = document.getElementById("memberBoard");
 const activeChannelTitle = document.getElementById("activeChannelTitle");
 
-// View Layout Elements for Friends Management Dashboard Toggles
 const activeChatLayout = document.getElementById("activeChatLayout");
 const friendsViewLayout = document.getElementById("friendsViewLayout");
 const friendsRosterBox = document.getElementById("friendsRosterBox");
 const friendsCountLabel = document.getElementById("friendsCountLabel");
 
-// ====== 3. Global State ======
 let currentChannelId = null;
 let stoatWS = null;
 let usersCache = {};
 let lastMessageAuthorId = null;
 let lastMessageType = null; 
 
-// ====== 4. Helper Functions ======
 function assignText(element, value) {
     if (element) element.textContent = value;
 }
@@ -40,7 +35,6 @@ function scrollToBottom() {
     }
 }
 
-// Decodes standard Crockford Base32 timestamp strings from Revolt ULID hashes
 function parseUlidTimestamp(id) {
     if (!id || id.length < 8) return new Date();
     const alphabet = "0123456789ABCDEFGHJKMNPQRSTVWXYZ";
@@ -84,7 +78,6 @@ async function getUserProfile(userId) {
     return userData;
 }
 
-// ====== 5. Initialization & Data Hydration ======
 async function initStoatClient() {
     if (!STOAT_TOKEN) {
         window.location.href = "/login";
@@ -113,13 +106,11 @@ async function initStoatClient() {
     const channels = await stoatFetch("/users/dms");
     await renderChannelList(channels || []);
 
-    // Load initial Friends View window state panel layout default presentation
     await openFriendsDashboard();
 
     connectToGateway();
 }
 
-// ====== 6. Render Sidebars ======
 async function renderChannelList(channels) {
     if (!chatsList) return;
     let html = "";
@@ -161,11 +152,9 @@ async function renderChannelList(channels) {
 
     chatsList.innerHTML = html;
     
-    // Smooth fade-out sequence
     if (loadingContainer) {
         setTimeout(() => {
             loadingContainer.classList.add("fade-out");
-            // Clean up display property after transition completes (400ms)
             setTimeout(() => {
                 loadingContainer.style.display = "none";
             }, 400);
@@ -227,7 +216,6 @@ async function renderMemberBoard(channelId) {
     memberBoard.innerHTML = html;
 }
 
-// ====== 7. UI Actions & Core Messaging ======
 async function openFriendsDashboard() {
     currentChannelId = null;
     lastMessageAuthorId = null;
@@ -266,7 +254,6 @@ async function openFriendsDashboard() {
                     : '/images/buffer40.gif';
                 const escapedName = name.replace(/'/g, "\\'");
 
-                // Dynamic Presence Processing Logic
                 const isOnline = profile && profile.online === true;
                 const statusText = isOnline ? "Online" : "Offline";
                 const labelColor = isOnline ? "#23a55a" : "#949ba4";
@@ -350,7 +337,6 @@ async function appendMessageToFeed(data) {
     const timeString = timeObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     let cleanHTML = "";
 
-    // 1. Process System Messaging
     if (data.system) {
         let systemText = "System action performed.";
         if (data.system.type === "text") {
@@ -373,7 +359,6 @@ async function appendMessageToFeed(data) {
         return;
     }
 
-    // 2. Extract media nodes outside of parent block containers to preserve formatting boundaries
     let mediaHTML = "";
     if (data.attachments && data.attachments.length > 0) {
         data.attachments.forEach(file => {
@@ -393,7 +378,6 @@ async function appendMessageToFeed(data) {
 
     const textHTML = data.content ? `<div class="message-content">${data.content}</div>` : '';
 
-    // 3. Render Consecutive Cascading Group Chains vs Normal Avatar Headers
     if (lastMessageAuthorId === data.author && lastMessageType === "user") {
         cleanHTML = `
             <div class="message-item consecutive">
@@ -442,7 +426,6 @@ if (channelTextInput) {
     });
 }
 
-// ====== 8. Native WebSocket Gateway Management ======
 function connectToGateway() {
     stoatWS = new WebSocket(STOAT_WS_URL);
 

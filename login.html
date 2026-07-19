@@ -11,14 +11,12 @@
     <link rel="stylesheet" href="/styles/login.css">
 
     <script>
-        // Prevent console errors in legacy browser environments
         if (!window.console) {
             window.console = { log: function () {} };
         }
 
-        // Redirect immediately if active token exists
         if (localStorage.getItem("stoat_token")) {
-            window.location.replace("app.html");
+            window.location.replace("app");
         }
     </script>
 </head>
@@ -37,8 +35,8 @@
             <div class="login-subtitle">Glad to see you around!</div>
 
             <div class="form-group">
-                <div class="form-label">USERNAME</div>
-                <input id="usernameInput" class="form-input" type="text" autocomplete="username" />
+                <div class="form-label">EMAIL</div>
+                <input id="usernameInput" class="form-input" type="text" autocomplete="email" />
                 <div id="loginStatusMessage" class="status-message"></div>
             </div>
 
@@ -46,14 +44,14 @@
                 <div class="form-label">PASSWORD</div>
                 <input id="passwordInput" class="form-input" type="password" autocomplete="current-password" />
                 <div class="sub-link-text">
-                    <a href="forgotPassword.html">Forgot your password?</a>
+                    <a href="forgotPassword">Forgot your password?</a>
                 </div>
             </div>
 
             <div class="form-group actions">
                 <button id="loginButton" class="btn-primary" onclick="submitlogin()">Login</button>
                 <div class="footer-text">
-                    Need an account? <a href="register.html">Register</a>
+                    Need an account? <a href="register">Register</a>
                 </div>
             </div>
         </div>

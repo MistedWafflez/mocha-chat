@@ -1,6 +1,3 @@
-/* ==========================================================================
-   1. Base Reset & Font Configurations
-   ========================================================================== */
 *, *::before, *::after {
     box-sizing: border-box;
 }
@@ -35,9 +32,6 @@ button {
     transition: background-color 0.2s ease, transform 0.1s ease, border-radius 0.2s ease;
 }
 
-/* ==========================================================================
-   2. Sleek Custom Scrollbars
-   ========================================================================== */
 ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
@@ -62,9 +56,6 @@ button {
     scrollbar-color: #1c1815 transparent;
 }
 
-/* ==========================================================================
-   3. Modern Layout Columns (Left-to-Right Grid Flow)
-   ========================================================================== */
 .sidebar-servers {
     width: 72px;
     height: 100%;
@@ -108,9 +99,6 @@ button {
     width: 241px;
 }
 
-/* ==========================================================================
-   4. Reusable Sidebar Dynamic Buttons
-   ========================================================================== */
 .button2 {
     width: 224px;
     height: 44px;
@@ -150,9 +138,6 @@ button {
     font-weight: 600;
 }
 
-/* ==========================================================================
-   5. Guild Icons & Left Bar Components
-   ========================================================================== */
 .server-btn {
     height: 48px;
     width: 48px;
@@ -185,9 +170,6 @@ button {
     margin: 4px 0;
 }
 
-/* ==========================================================================
-   6. Bottom User Identity Bar Drawer
-   ========================================================================== */
 .profile-bar {
     width: 241px;
     height: 56px;
@@ -283,9 +265,6 @@ button {
     opacity: 0.8;
 }
 
-/* ==========================================================================
-   7. Filter Inputs & Structural Utilities
-   ========================================================================== */
 .search-container {
     padding: 12px 10px;
 }
@@ -331,9 +310,6 @@ button {
     margin: 8px 8px;
 }
 
-/* ==========================================================================
-   8. Top Header Navigation Bar Component
-   ========================================================================== */
 .chat-header-bar {
     height: 50px;
     width: calc(100% - 313px);
@@ -371,9 +347,6 @@ button {
     color: #f5efe9;
 }
 
-/* ==========================================================================
-   9. Active Feed Messages Container (Discord Cascading Update)
-   ========================================================================== */
 .messages-scroller {
     height: calc(100% - 68px);
     width: 100%;
@@ -383,7 +356,6 @@ button {
     flex-direction: column;
 }
 
-/* Base message wrapper */
 .message-item {
     display: flex;
     padding: 2px 16px;
@@ -392,7 +364,6 @@ button {
     margin-top: 14px;
 }
 
-/* Compact consecutive nested message element */
 .message-item.consecutive {
     margin-top: 0;
     padding-top: 2px;
@@ -480,9 +451,6 @@ button {
     font-family: 'Inter', monospace;
 }
 
-/* ==========================================================================
-   10. Compact Interactive Chat Input Composer
-   ========================================================================== */
 .message-input-bar {
     position: absolute;
     bottom: 16px;
@@ -528,9 +496,6 @@ button {
     color: #8c7f73;
 }
 
-/* ==========================================================================
-   11. Right Panels / Roster Container Inner Items
-   ========================================================================== */
 .members-header-label {
     padding: 16px 16px 8px 16px;
     font-size: 12px;
@@ -572,9 +537,6 @@ button {
     font-style: italic;
 }
 
-/* ==========================================================================
-   12. Overlays & Centered Splash Spinners
-   ========================================================================== */
 .loading-overlay {
     width: 100vw;
     height: 100vh;
