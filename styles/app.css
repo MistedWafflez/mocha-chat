@@ -1008,3 +1008,200 @@ button {
     from { opacity: 0; transform: scale(0.97); }
     to { opacity: 1; transform: scale(1); }
 }
+
+.user-profile-card {
+    background-color: #11100f;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 12px;
+}
+
+.profile-card-banner {
+    height: 80px;
+    background-color: #2b2723;
+    background-size: cover;
+    background-position: center;
+}
+
+.profile-card-header {
+    padding: 0 16px;
+    position: relative;
+    height: 36px;
+}
+
+.profile-card-avatar {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background-size: cover;
+    background-position: center;
+    border: 4px solid #11100f;
+    position: absolute;
+    top: -32px;
+    left: 16px;
+}
+
+.profile-card-status {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 2px solid #11100f;
+}
+
+.profile-card-info {
+    padding: 8px 16px 16px 16px;
+}
+
+.profile-card-username {
+    font-size: 18px;
+    font-weight: 700;
+    color: #f5efe9;
+}
+
+.profile-card-status-text {
+    font-size: 12px;
+    color: #8c7f73;
+    margin-top: 2px;
+}
+
+.profile-card-divider {
+    height: 1px;
+    background-color: rgba(255, 255, 255, 0.08);
+    margin: 12px 0;
+}
+
+.profile-card-section-title {
+    font-size: 11px;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: #a69a8f;
+    letter-spacing: 0.5px;
+}
+
+.profile-card-bio {
+    font-size: 13px;
+    color: #e3deda;
+    line-height: 1.4;
+    white-space: pre-wrap;
+}
+
+/* Bottom Left User Profile Popout */
+.user-profile-popout {
+    position: absolute;
+    bottom: 60px;
+    left: 8px;
+    width: 280px;
+    background-color: #12100e;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.7);
+    z-index: 15000;
+    overflow: hidden;
+    animation: popoutSlideUp 0.18s ease-out;
+}
+
+@keyframes popoutSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px) scale(0.96);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.popout-banner {
+    height: 60px;
+    background-color: #ba8c63;
+    background-size: cover;
+    background-position: center;
+}
+
+.popout-header {
+    position: relative;
+    padding: 0 16px;
+    height: 30px;
+}
+
+.popout-avatar {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background-size: cover;
+    background-position: center;
+    border: 5px solid #12100e;
+    position: absolute;
+    top: -38px;
+    left: 14px;
+    background-color: #28231d;
+}
+
+.popout-status-dot {
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 3px solid #12100e;
+    background-color: #23a55a;
+}
+
+.popout-body {
+    padding: 12px 16px 16px 16px;
+    background-color: #1a1714;
+    border-radius: 0 0 12px 12px;
+}
+
+.popout-username {
+    font-size: 16px;
+    font-weight: 700;
+    color: #f5efe9;
+    line-height: 1.2;
+}
+
+.popout-custom-status {
+    font-size: 12px;
+    color: #a69a8f;
+    margin-top: 4px;
+    word-break: break-word;
+}
+
+.popout-divider {
+    height: 1px;
+    background-color: rgba(255, 255, 255, 0.08);
+    margin: 12px 0;
+}
+
+.popout-section-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: #8c7f73;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+}
+
+.popout-bio {
+    font-size: 13px;
+    color: #e3deda;
+    line-height: 1.4;
+    white-space: pre-wrap;
+    word-break: break-word;
+    max-height: 120px;
+    overflow-y: auto;
+}
+
+.user-info {
+    cursor: pointer;
+    border-radius: 4px;
+    padding: 2px 4px;
+    transition: background-color 0.15s ease;
+}
+
+.user-info:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}

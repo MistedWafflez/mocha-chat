@@ -123,6 +123,76 @@ async function getUserProfile(userId) {
     return userData;
 }
 
+async function getUserProfileData(userId) {
+    const user = await getUserProfile(userId);
+    if (!user) return null;
+
+    // Fetch profile bio content and background from /users/:id/profile
+    const profile = await stoatFetch(`/users/${userId}/profile`).catch(() => null);
+
+    return { user, profile };
+}
+
+// Open User Profile Modal with fetched bio & background
+async function openUserProfileModal(userId) {
+    hideContextMenu();
+    const data = await getUserProfileData(userId);
+    if (!data || !data.user) return;
+
+    const { user, profile } = data;
+
+    const modalOverlay = document.getElementById("customModalOverlay");
+    const modalTitle = document.getElementById("modalTitle");
+    const modalBody = document.getElementById("modalBody");
+    const modalActions = document.getElementById("modalActions");
+
+    if (!modalOverlay) return;
+
+    // Avatar image URL
+    const avatarUrl = user.avatar
+        ? `${STOAT_AUTUMN}/avatars/${user.avatar._id}`
+        : '/images/buffer40.gif';
+
+    // Profile Banner URL (stored under /backgrounds in Autumn)
+    const bannerId = profile?.background?._id || user.banner?._id;
+    const bannerTag = profile?.background ? 'backgrounds' : 'banners';
+    const bannerUrl = bannerId ? `${STOAT_AUTUMN}/${bannerTag}/${bannerId}` : null;
+
+    // Status display (handles custom status text if present)
+    const presence = user.status?.presence || (user.online ? "Online" : "Offline");
+    const statusText = user.status?.text ? `${presence} — ${user.status.text}` : presence;
+    const statusColor = user.online ? "#23a55a" : "#80848e";
+
+    // Bio content from Revolt's UserProfile payload
+    const bioText = profile?.content || "No bio provided.";
+
+    modalTitle.textContent = user.username;
+    
+    modalBody.innerHTML = `
+        <div class="user-profile-card">
+            <div class="profile-card-banner" style="${bannerUrl ? `background-image: url('${bannerUrl}');` : ''}"></div>
+            <div class="profile-card-header">
+                <div class="profile-card-avatar" style="background-image: url('${avatarUrl}');">
+                    <div class="profile-card-status" style="background-color: ${statusColor};"></div>
+                </div>
+            </div>
+            <div class="profile-card-info">
+                <div class="profile-card-username">${user.username}</div>
+                <div class="profile-card-status-text">${statusText}</div>
+                <div class="profile-card-divider"></div>
+                <div class="profile-card-section-title">About Me</div>
+                <div class="profile-card-bio">${bioText}</div>
+            </div>
+        </div>
+    `;
+
+    modalActions.innerHTML = `
+        <button class="modal-btn modal-btn-secondary" onclick="closeCustomModal()">Close</button>
+    `;
+
+    modalOverlay.style.display = "flex";
+}
+
 async function initStoatClient() {
     if (logoutBtn) logoutBtn.addEventListener("click", handleLogout);
     if (openSettingsBtn) openSettingsBtn.addEventListener("click", () => toggleSettings(true));
@@ -334,7 +404,7 @@ async function renderMemberBoard(channelId) {
             : '/images/buffer40.gif';
 
         html += `
-            <button class="button2">
+            <button class="button2" onclick="openUserProfileModal('${userId}')">
                 <div class="item-btn-avatar" style="background-image: url('${avatarUrl}');"></div>
                 <div class="item-btn-label">${name}</div>
             </button>
@@ -390,7 +460,7 @@ async function openFriendsDashboard() {
 
                 html += `
                     <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px; background-color: rgba(43, 45, 49, 0.4); border-radius: 8px; border: 1px solid rgba(255,255,255,0.02);">
-                        <div style="display: flex; align-items: center; gap: 12px;">
+                        <div style="display: flex; align-items: center; gap: 12px; cursor: pointer;" onclick="openUserProfileModal('${otherUserId}')">
                             <div style="width: 38px; height: 38px; background-image: url('${avatarUrl}'); background-size: cover; background-position: center; border-radius: 50%; position: relative;">
                                 <div style="position: absolute; width: 14px; height: 14px; bottom: -2px; right: -2px; background-color: #1e1f22; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
                                     <div style="height: 9px; width: 9px; background-color: ${badgeColor}; border-radius: 50%;"></div>
@@ -530,10 +600,10 @@ async function appendMessageToFeed(data) {
 
         cleanHTML = `
             <div class="message-item" data-message-id="${data._id}" data-author-id="${data.author}">
-                <div class="message-avatar" style="background-image: url('${avatarUrl}');"></div>
+                <div class="message-avatar" style="background-image: url('${avatarUrl}'); cursor: pointer;" onclick="openUserProfileModal('${data.author}')"></div>
                 <div class="message-details">
                     <div class="message-header">
-                        <span class="message-author">${authorName}</span>
+                        <span class="message-author" style="cursor: pointer;" onclick="openUserProfileModal('${data.author}')">${authorName}</span>
                         <span class="message-timestamp">${timeString}</span>
                     </div>
                     ${textHTML}
@@ -810,6 +880,7 @@ document.addEventListener("contextmenu", (e) => {
         const isMyMessage = authorId === myId;
 
         const menuItems = [
+            { label: "View Profile", action: `openUserProfileModal('${authorId}')` },
             { label: "Copy Text", action: `copyMessageContent('${msgId}')` },
             { label: "Copy Message ID", action: `copyMessageId('${msgId}')` }
         ];
