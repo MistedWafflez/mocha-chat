@@ -482,7 +482,7 @@ button {
 
 /* Input bar pinned cleanly at bottom as a flex item */
 .message-input-bar {
-    position: relative;
+    position: absolute;
     bottom: 0;
     left: 0;
     margin: 8px 16px 16px 16px;
@@ -1346,6 +1346,7 @@ button {
     height: 100%;
     padding: 16px;
     box-sizing: border-box;
+    padding-bottom: 72px;
 }
 
 #channelMessagesBox > *:first-child {
