@@ -464,15 +464,6 @@ button {
     font-family: 'Inter', monospace;
 }
 
-/* Layout container for chat view */
-#activeChatLayout {
-    display: flex !important;
-    flex-direction: column;
-    height: 100%;
-    position: relative;
-    width: 100%;
-}
-
 /* Scrollable message area */
 .messages-scroller {
     flex: 1;
@@ -1359,4 +1350,32 @@ button {
 
 #channelMessagesBox > *:first-child {
     margin-top: auto !important;
+}
+
+/* Ensure the friends roster container fills available space */
+.friends-roster-box {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 16px;
+    width: 100%;
+}
+
+/* Container for active chat (default hidden) */
+#activeChatLayout {
+    display: none;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    position: relative;
+}
+
+/* Container for friends view (default visible) */
+#friendsViewLayout {
+    display: block;
+    height: 100%;
+    width: 100%;
+    padding: 20px;
+    overflow-y: auto;
+    box-sizing: border-box;
 }

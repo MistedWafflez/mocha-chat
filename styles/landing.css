@@ -96,3 +96,65 @@ a {
     background-color: rgba(186, 140, 99, 0.25);
     color: #ffffff;
 }
+
+.disclaimer-banner {
+    background-color: rgba(18, 16, 14, 0.5);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 8px 16px;
+    text-align: center;
+    font-size: 13px;
+    color: #e3deda;
+}
+
+.disclaimer-banner p {
+    margin: 0;
+}
+
+.disclaimer-banner strong {
+    color: #f5efe9;
+}
+
+.disclaimer-banner a {
+    color: #ba8c63;
+    text-decoration: underline;
+    transition: color 0.2s ease;
+}
+
+.disclaimer-banner a:hover {
+    color: #ffffff;
+}
+
+.landing-footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 12px 20px;
+    text-align: center;
+    background-color: rgba(18, 16, 14, 0.6);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.disclaimer-text {
+    margin: 0;
+    font-size: 12px;
+    color: #a8a29e;
+}
+
+.disclaimer-text strong {
+    color: #e3deda;
+}
+
+.disclaimer-text a {
+    color: #ba8c63;
+    text-decoration: underline;
+}
+
+.disclaimer-text a:hover {
+    color: #ffffff;
+}
+

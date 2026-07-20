@@ -32,27 +32,44 @@
 
     <main class="login-card">
         <div id="loginContainer">
-            <div class="login-title">Welcome back!</div>
-            <div class="login-subtitle">Glad to see you around!</div>
+            <div id="cardTitle" class="login-title">Welcome back!</div>
+            <div id="cardSubtitle" class="login-subtitle">Glad to see you around!</div>
 
-            <div class="form-group">
-                <div class="form-label">EMAIL</div>
+            <div class="form-group" id="emailGroup">
+                <div class="form-label" id="emailLabel">EMAIL</div>
                 <input id="usernameInput" class="form-input" type="text" autocomplete="email" />
-                <div id="loginStatusMessage" class="status-message" style="display: none;"></div>
             </div>
 
-            <div class="form-group tight">
+            <div class="form-group tight" id="passwordGroup">
                 <div class="form-label">PASSWORD</div>
                 <input id="passwordInput" class="form-input" type="password" autocomplete="current-password" />
                 <div class="sub-link-text">
-                    <a href="forgotPassword">Forgot your password?</a>
+                    <a href="#" id="forgotPasswordLink" onclick="showForgotPasswordUI(event)">Forgot your password?</a>
                 </div>
             </div>
 
+            <div class="form-group tight" id="tokenGroup" style="display: none;">
+                <div class="form-label">RESET / VERIFICATION TOKEN</div>
+                <input id="tokenInput" class="form-input" type="text" placeholder="Enter code from email" />
+            </div>
+
+            <div class="form-group tight" id="newPasswordGroup" style="display: none;">
+                <div class="form-label">NEW PASSWORD</div>
+                <input id="newPasswordInput" class="form-input" type="password" />
+            </div>
+
+            <div class="form-group tight">
+                <div id="loginStatusMessage" class="status-message" style="display: none;"></div>
+            </div>
+
             <div class="form-group actions">
-                <button id="loginButton" class="btn-primary" onclick="submitlogin()">Login</button>
-                <div class="footer-text">
+                <button id="loginButton" class="btn-primary" onclick="handlePrimaryAction()">Login</button>
+                
+                <div class="footer-text" id="footerText">
                     Need an account? <a href="register">Register</a>
+                </div>
+                <div class="footer-text" id="backToLoginText" style="display: none;">
+                    Remembered it? <a href="#" onclick="showLoginUI(event)">Back to Login</a>
                 </div>
             </div>
         </div>
@@ -62,6 +79,13 @@
     </main>
 
     <script src="/scripts/login.js"></script>
+
+    <footer class="landing-footer">
+        <p class="disclaimer-text">
+            <strong>Note:</strong> Mocha is a third-party client for <a href="https://stoat.chat" target="_blank"
+                rel="noopener noreferrer">stoat.chat</a>.
+        </p>
+    </footer>
 
 </body>
 

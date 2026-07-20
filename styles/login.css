@@ -173,3 +173,129 @@ a:hover {
     left: calc(50% - 20px);
     top: calc(50% - 20px);
 }
+
+.disclaimer-banner {
+    background-color: rgba(18, 16, 14, 0.5);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 8px 16px;
+    text-align: center;
+    font-size: 13px;
+    color: #e3deda;
+}
+
+.disclaimer-banner p {
+    margin: 0;
+}
+
+.disclaimer-banner strong {
+    color: #f5efe9;
+}
+
+.disclaimer-banner a {
+    color: #ba8c63;
+    text-decoration: underline;
+    transition: color 0.2s ease;
+}
+
+.disclaimer-banner a:hover {
+    color: #ffffff;
+}
+
+.landing-footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 12px 20px;
+    text-align: center;
+    background-color: rgba(18, 16, 14, 0.6);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.disclaimer-text {
+    margin: 0;
+    font-size: 12px;
+    color: #a8a29e;
+}
+
+.disclaimer-text strong {
+    color: #e3deda;
+}
+
+.disclaimer-text a {
+    color: #ba8c63;
+    text-decoration: underline;
+}
+
+.disclaimer-text a:hover {
+    color: #ffffff;
+}
+
+.register-card {
+    width: 480px;
+    background-color: #1a1714;
+    margin: auto;
+    position: relative;
+    overflow: hidden;
+    border-radius: 8px;
+    top: calc(50% - 310px); /* adjusted vertical position for taller card */
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    padding-bottom: 12px;
+}
+
+.register-title {
+    text-align: center;
+    padding: 20px 8px 10px 8px;
+    font-size: 22px;
+    font-weight: 700;
+    color: #f5efe9;
+}
+
+.required {
+    color: #ff666e;
+}
+
+.dob-select-group {
+    display: flex;
+    gap: 8px;
+    margin-top: 4px;
+}
+
+.form-select {
+    flex: 1;
+    height: 38px;
+    background-color: #12100e;
+    color: #f5efe9;
+    border: 1px solid #28221c;
+    border-radius: 4px;
+    font-size: 14px;
+    padding: 0 8px;
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.15s ease;
+}
+
+.form-select:focus {
+    border-color: #ba8c63;
+}
+
+.form-select option {
+    background-color: #1a1714;
+    color: #f5efe9;
+}
+
+.terms-notice {
+    font-size: 11px;
+    color: #8c7f73;
+    margin-top: 10px;
+    line-height: 1.4;
+}
+
+.terms-notice a {
+    color: #ba8c63;
+}

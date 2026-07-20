@@ -633,8 +633,6 @@ async function openFriendsDashboard() {
     friendsRosterBox.innerHTML = connectionsFound > 0 ? html : '<div class="placeholder-notice">No active conversations found.</div>';
 }
 
-
-
 async function sendMessage() {
     const text = channelTextInput.value.trim();
     if (currentChannelId && text) {

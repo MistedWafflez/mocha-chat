@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Mocha — Create an Account</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/styles/login.css">
+
+    <script>
+        if (!window.console) {
+            window.console = { log: function () { } };
+        }
+
+        if (localStorage.getItem("stoat_token")) {
+            window.location.replace("app");
+        }
+    </script>
+</head>
+
+<body>
+
+    <header class="top-nav-wrapper">
+        <div class="top-nav-inner">
+            <div class="brand-logo"><a href="/">Mocha</a></div>
+        </div>
+    </header>
+
+    <main class="register-card">
+        <div id="registerContainer">
+            <div class="register-title">Create an account</div>
+
+            <div class="form-group">
+                <div class="form-label">EMAIL <span class="required">*</span></div>
+                <input id="emailInput" class="form-input" type="email" autocomplete="email" required />
+            </div>
+
+            <div class="form-group tight">
+                <div class="form-label">DISPLAY NAME</div>
+                <input id="displayNameInput" class="form-input" type="text" autocomplete="nickname" />
+            </div>
+
+            <div class="form-group tight">
+                <div class="form-label">USERNAME <span class="required">*</span></div>
+                <input id="usernameInput" class="form-input" type="text" autocomplete="username" required />
+            </div>
+
+            <div class="form-group tight">
+                <div class="form-label">PASSWORD <span class="required">*</span></div>
+                <input id="passwordInput" class="form-input" type="password" autocomplete="new-password" required />
+            </div>
+
+            <div class="form-group tight">
+                <div class="form-label">DATE OF BIRTH <span class="required">*</span></div>
+                <div class="dob-select-group">
+                    <select id="dobMonth" class="form-select" aria-label="Month" required>
+                        <option value="" disabled selected hidden>Month</option>
+                        <option value="1">January</option>
+                        <option value="2">February</option>
+                        <option value="3">March</option>
+                        <option value="4">April</option>
+                        <option value="5">May</option>
+                        <option value="6">June</option>
+                        <option value="7">July</option>
+                        <option value="8">August</option>
+                        <option value="9">September</option>
+                        <option value="10">October</option>
+                        <option value="11">November</option>
+                        <option value="12">December</option>
+                    </select>
+
+                    <select id="dobDay" class="form-select" aria-label="Day" required>
+                        <option value="" disabled selected hidden>Day</option>
+                    </select>
+
+                    <select id="dobYear" class="form-select" aria-label="Year" required>
+                        <option value="" disabled selected hidden>Year</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="registerStatusMessage" class="status-message" style="display: none;"></div>
+
+            <div class="form-group actions">
+                <button id="registerButton" class="btn-primary">Continue</button>
+
+                <div class="terms-notice">
+                    By registering, you agree to stoat.chat's
+                    <a href="https://stoat.chat/terms" target="_blank" rel="noopener noreferrer">Terms of Service</a>
+                    and
+                    <a href="https://stoat.chat/privacy" target="_blank" rel="noopener noreferrer">Privacy Policy</a>.
+                </div>
+
+                <div class="footer-text">
+                    <a href="login">Already have an account?</a>
+                </div>
+            </div>
+        </div>
+
+        <img id="registerLoadingIcon" class="loading-spinner-icon" src="/images/buffer120.gif" width="40" height="40"
+            alt="Loading..." style="display: none;" />
+    </main>
+
+    <script src="/scripts/register.js"></script>
+
+    <footer class="landing-footer">
+        <p class="disclaimer-text">
+            <strong>Note:</strong> Mocha is a third-party client for <a href="https://stoat.chat" target="_blank"
+                rel="noopener noreferrer">stoat.chat</a>.
+        </p>
+    </footer>
+
+</body>
+
+</html>
