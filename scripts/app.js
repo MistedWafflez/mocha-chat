@@ -91,17 +91,7 @@ function toggleSettings(show) {
             const me = usersCache[myId];
             if (settingsUsername) settingsUsername.textContent = me.username;
             if (settingsAvatar && me.avatar) {
-                const imgUrl = `${STOAT_AUTUMN}/avatars/${me.avatar._id}`;
-
-                // Preload image to test if it loads successfully
-                const img = new Image();
-                img.src = imgUrl;
-                img.onload = () => {
-                    settingsAvatar.style.backgroundImage = `url('${imgUrl}')`;
-                };
-                img.onerror = () => {
-                    settingsAvatar.style.backgroundImage = `url('/images/buffer120.gif')`;
-                };
+                settingsAvatar.style.backgroundImage = `url(${STOAT_AUTUMN}/avatars/${me.avatar._id})`;
             }
         }
         settingsOverlay.classList.add("active");
@@ -176,21 +166,22 @@ async function openUserProfileModal(userId) {
     modalTitle.textContent = user.username;
 
     modalBody.innerHTML = `
-    <div class="user-profile-card">
-        <div class="profile-card-banner" style="position: relative; overflow: hidden;">
-            ${bannerUrl ? `<img src="${bannerUrl}" onerror="this.onerror=null; this.src='/images/buffer200.gif';" style="width:100%; height:100%; object-fit:cover;">` : ''}
-        </div>
-        <div class="profile-card-header">
-            <div class="profile-card-avatar" style="position: relative; overflow: hidden;">
-                <img src="${avatarUrl}" 
-                     onerror="this.onerror=null; this.src='/images/buffer120.gif';" 
-                     style="width:100%; height:100%; object-fit:cover; border-radius:50%;">
-                <div class="profile-card-status" style="background-color: ${statusColor};"></div>
+        <div class="user-profile-card">
+            <div class="profile-card-banner" style="${bannerUrl ? `background-image: url('${bannerUrl}');` : ''}"></div>
+            <div class="profile-card-header">
+                <div class="profile-card-avatar" style="background-image: url('${avatarUrl}');">
+                    <div class="profile-card-status" style="background-color: ${statusColor};"></div>
+                </div>
+            </div>
+            <div class="profile-card-info">
+                <div class="profile-card-username">${user.username}</div>
+                <div class="profile-card-status-text">${statusText}</div>
+                <div class="profile-card-divider"></div>
+                <div class="profile-card-section-title">About Me</div>
+                <div class="profile-card-bio">${bioText}</div>
             </div>
         </div>
-        ...
-    </div>
-`;
+    `;
 
     modalActions.innerHTML = `
         <button class="modal-btn modal-btn-secondary" onclick="closeCustomModal()">Close</button>
@@ -350,15 +341,14 @@ function generateMessageHTML(data) {
         data.attachments.forEach(file => {
             if (file.tag === "attachments" || (file.metadata && file.metadata.type === "Image")) {
                 mediaHTML += `
-    <div style="margin-top: 6px; display: block;">
-        <div style="display: inline-flex; border-radius: 4px; overflow: hidden; max-width: fit-content; background-color: #2b2d31; vertical-align: bottom;">
-            <img src="${STOAT_AUTUMN}/attachments/${file._id}/${file.filename}" 
-                 onerror="this.onerror=null; this.src='/images/buffer200.gif';"
-                 style="max-width: 400px; max-height: 300px; width: auto; height: auto; object-fit: contain; display: block; cursor: pointer;" 
-                 alt="Attachment">
-        </div>
-    </div>
-`;
+                    <div style="margin-top: 6px; display: block;">
+                        <div style="display: inline-flex; border-radius: 4px; overflow: hidden; max-width: fit-content; background-color: #2b2d31; vertical-align: bottom;">
+                            <img src="${STOAT_AUTUMN}/attachments/${file._id}/${file.filename}" onerror="this.onerror=null; this.src='/images/buffer120.gif';"
+                                 style="max-width: 400px; max-height: 300px; width: auto; height: auto; object-fit: contain; display: block; cursor: pointer;" 
+                                 alt="Attachment">
+                        </div>
+                    </div>
+                `;
             }
         });
     }
@@ -386,15 +376,18 @@ function generateMessageHTML(data) {
             : '/images/buffer40.gif';
 
         cleanHTML = `
-    <div class="message-item" data-message-id="${data._id}" data-author-id="${data.author}">
-        <img class="message-avatar" 
-             src="${avatarUrl}" 
-             onerror="this.onerror=null; this.src='/images/buffer120.gif';"
-             style="cursor: pointer; object-fit: cover;" 
-             onclick="openUserProfileModal('${data.author}')">
-        <div class="message-details"> ... </div>
-    </div>
-`;
+            <div class="message-item" data-message-id="${data._id}" data-author-id="${data.author}">
+                <div class="message-avatar" style="background-image: url('${avatarUrl}'); cursor: pointer;" onclick="openUserProfileModal('${data.author}')"></div>
+                <div class="message-details">
+                    <div class="message-header">
+                        <span class="message-author" style="cursor: pointer;" onclick="openUserProfileModal('${data.author}')">${authorName}</span>
+                        <span class="message-timestamp">${timeString}</span>
+                    </div>
+                    ${textHTML}
+                    ${mediaHTML}
+                </div>
+            </div>
+        `;
     }
 
     lastMessageAuthorId = data.author;
@@ -469,7 +462,7 @@ async function renderMemberBoard(channelId) {
     memberBoard.innerHTML = '<div class="placeholder-notice">Loading members...</div>';
 
     const channel = await stoatFetch(`/channels/${channelId}`);
-
+    
     // Abort if channel changed while fetching
     if (currentMemberBoardChannelId !== channelId) return;
     if (!channel) return;
@@ -478,19 +471,19 @@ async function renderMemberBoard(channelId) {
 
     if (channel.server) {
         const responseData = await stoatFetch(`/servers/${channel.server}/members`);
-
+        
         // Abort if channel changed during server fetch
         if (currentMemberBoardChannelId !== channelId) return;
 
         if (responseData) {
             let membersList = Array.isArray(responseData) ? responseData : (responseData.members || []);
-
+            
             if (Array.isArray(responseData.users)) {
                 for (const u of responseData.users) {
                     if (u && u._id) usersCache[u._id] = u;
                 }
             }
-
+            
             userIds = membersList.map(m => {
                 return (m.id && m.id.user) ? m.id.user : (m._id && m._id.user ? m._id.user : m._id);
             }).filter(Boolean);
@@ -549,13 +542,10 @@ async function renderMemberBoard(channelId) {
             button.onclick = () => openUserProfileModal(userId);
 
             button.innerHTML = `
-    <img class="item-btn-avatar" 
-         src="${avatarUrl}" 
-         onerror="this.onerror=null; this.src='/images/buffer120.gif';"
-         style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover;">
-    <div class="item-btn-label"></div>
-`;
-
+                <div class="item-btn-avatar" style="background-image: url('${avatarUrl}');"></div>
+                <div class="item-btn-label"></div>
+            `;
+            
             button.querySelector('.item-btn-label').textContent = name;
             fragment.appendChild(button);
         }
@@ -701,7 +691,7 @@ function renderServerList(servers = []) {
 
         html += `
             <button class="server-btn ${isActive ? 'active' : ''}" data-server-id="${server._id}" onclick="openServer('${server._id}', '${escapedName}')" title="${escapedName}">
-                <img class="server-btn-img" src="${iconUrl}" alt="${escapedName}">
+                <img class="server-btn-img" src="${iconUrl}" alt="${escapedName}" onerror="this.onerror=null; this.src='/images/buffer120.gif';">
             </button>
         `;
     });
@@ -1024,7 +1014,7 @@ async function openServer(serverId, serverName) {
     if (serverRes) {
         const serverData = serverRes.server || serverRes;
         serversCache[serverId] = serverData;
-
+        
         if (Array.isArray(serverData.channels)) {
             channelIds = serverData.channels;
         }
