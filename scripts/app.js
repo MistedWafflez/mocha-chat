@@ -1,6 +1,6 @@
-const STOAT_API_URL = "https://api.revolt.chat";
-const STOAT_WS_URL = "wss://ws.revolt.chat?format=json";
-const STOAT_AUTUMN = "https://autumn.revolt.chat";
+const STOAT_API_URL = "https://stoat.chat/api";
+const STOAT_WS_URL = "wss://events.stoat.chat";
+const STOAT_AUTUMN = "https://cdn.stoatusercontent.com";
 const STOAT_TOKEN = localStorage.getItem("stoat_token");
 
 const loadingContainer = document.getElementById("loadingContainer");
