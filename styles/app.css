@@ -1895,6 +1895,10 @@ body.is-electron {
     overflow: hidden;
 }
 
+.app-container {
+    height: 100%;
+}
+
 body.is-electron .app-container {
     display: flex;
     position: relative;
