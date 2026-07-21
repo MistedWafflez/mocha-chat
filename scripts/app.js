@@ -819,12 +819,23 @@ function appendMessageToFeed(msg) {
     channelMessagesBox.scrollTop = channelMessagesBox.scrollHeight;
 }
 
-// Optional helper to jump to the replied message when clicked
 function scrollToMessage(msgId) {
     if (!msgId) return;
     const targetElem = document.querySelector(`[data-message-id="${msgId}"]`);
-    if (targetElem) {
-        targetElem.scrollIntoView({ behavior: "smooth", block: "center" });
+    const container = document.getElementById('channelMessagesBox');
+
+    if (targetElem && container) {
+        // Calculate offset inside the container only
+        const containerRect = container.getBoundingClientRect();
+        const targetRect = targetElem.getBoundingClientRect();
+        const offset = targetRect.top - containerRect.top + container.scrollTop;
+
+        // Scroll the container so the message lands in the middle
+        container.scrollTo({
+            top: offset - (containerRect.height / 2) + (targetRect.height / 2),
+            behavior: "smooth"
+        });
+
         targetElem.classList.add("highlight-message");
         setTimeout(() => targetElem.classList.remove("highlight-message"), 2000);
     }
