@@ -6,7 +6,9 @@ const STOAT_TOKEN = localStorage.getItem("stoat_token");
 const loadingContainer = document.getElementById("loadingContainer");
 const cLoadingText = document.getElementById("cLoadingText");
 const displayNameDisplay = document.getElementById("displayNameDisplay");
-const profileNavigationButtom = document.getElementById("profileNavigationButtom");
+const profileNavigationButtom = document.getElementById(
+    "profileNavigationButtom",
+);
 const statusDisplay = document.getElementById("statusDisplay");
 const chatsList = document.getElementById("chatsList");
 const channelMessagesBox = document.getElementById("channelMessagesBox");
@@ -34,6 +36,7 @@ let userDMsCache = [];
 let lastMessageAuthorId = null;
 let lastMessageType = null;
 let currentMemberBoardChannelId = null;
+let messagesCache = {}; // Caches messages so reply headers can resolve target message details
 
 function assignText(element, value) {
     if (element) element.textContent = value;
@@ -64,7 +67,7 @@ function parseUlidTimestamp(id) {
         const char = timePart[i];
         const value = alphabet.indexOf(char);
         if (value === -1) return new Date();
-        timestamp = (timestamp * 32) + value;
+        timestamp = timestamp * 32 + value;
     }
 
     const date = new Date(timestamp);
@@ -105,10 +108,13 @@ async function stoatFetch(endpoint, options = {}) {
     const headers = {
         "x-session-token": STOAT_TOKEN,
         "Content-Type": "application/json",
-        ...options.headers
+        ...options.headers,
     };
     try {
-        const response = await fetch(`${STOAT_API_URL}${endpoint}`, { ...options, headers });
+        const response = await fetch(`${STOAT_API_URL}${endpoint}`, {
+            ...options,
+            headers,
+        });
         if (!response.ok) throw new Error(`API Error: ${response.status}`);
         return await response.json();
     } catch (err) {
@@ -130,7 +136,9 @@ async function getUserProfileData(userId) {
     const user = await getUserProfile(userId);
     if (!user) return null;
 
-    const profile = await stoatFetch(`/users/${userId}/profile`).catch(() => null);
+    const profile = await stoatFetch(`/users/${userId}/profile`).catch(
+        () => null,
+    );
 
     return { user, profile };
 }
@@ -151,14 +159,19 @@ async function openUserProfileModal(userId) {
 
     const avatarUrl = user.avatar
         ? `${STOAT_AUTUMN}/avatars/${user.avatar._id}`
-        : '/images/buffer40.gif';
+        : "/images/buffer40.gif";
 
     const bannerId = profile?.background?._id || user.banner?._id;
-    const bannerTag = profile?.background ? 'backgrounds' : 'banners';
-    const bannerUrl = bannerId ? `${STOAT_AUTUMN}/${bannerTag}/${bannerId}` : null;
+    const bannerTag = profile?.background ? "backgrounds" : "banners";
+    const bannerUrl = bannerId
+        ? `${STOAT_AUTUMN}/${bannerTag}/${bannerId}`
+        : null;
 
-    const presence = user.status?.presence || (user.online ? "Online" : "Offline");
-    const statusText = user.status?.text ? `${presence} — ${user.status.text}` : presence;
+    const presence =
+        user.status?.presence || (user.online ? "Online" : "Offline");
+    const statusText = user.status?.text
+        ? `${presence} — ${user.status.text}`
+        : presence;
     const statusColor = user.online ? "#23a55a" : "#80848e";
 
     const bioText = profile?.content || "No bio provided.";
@@ -167,7 +180,7 @@ async function openUserProfileModal(userId) {
 
     modalBody.innerHTML = `
         <div class="user-profile-card">
-            <div class="profile-card-banner" style="${bannerUrl ? `background-image: url('${bannerUrl}');` : ''}"></div>
+            <div class="profile-card-banner" style="${bannerUrl ? `background-image: url('${bannerUrl}');` : ""}"></div>
             <div class="profile-card-header">
                 <div class="profile-card-avatar" style="background-image: url('${avatarUrl}');">
                     <div class="profile-card-status" style="background-color: ${statusColor};"></div>
@@ -193,10 +206,12 @@ async function openUserProfileModal(userId) {
 async function openHomeView() {
     currentServerId = null;
 
-    document.querySelectorAll('.server-btn').forEach(btn => btn.classList.remove('active'));
-    document.getElementById('btnHomeServer')?.classList.add('active');
+    document
+        .querySelectorAll(".server-btn")
+        .forEach((btn) => btn.classList.remove("active"));
+    document.getElementById("btnHomeServer")?.classList.add("active");
 
-    const headerContainer = document.getElementById('channelSidebarHeader');
+    const headerContainer = document.getElementById("channelSidebarHeader");
     if (headerContainer) {
         headerContainer.innerHTML = `
             <div class="search-container">
@@ -218,7 +233,9 @@ async function renderServerChannelList(channels) {
     if (!chatsList) return;
     let html = "";
 
-    const textChannels = channels.filter(c => c.channel_type === "TextChannel" || !c.channel_type);
+    const textChannels = channels.filter(
+        (c) => c.channel_type === "TextChannel" || !c.channel_type,
+    );
 
     if (textChannels.length > 0) {
         html += `<div class="channel-category-label">TEXT CHANNELS</div>`;
@@ -245,7 +262,7 @@ async function renderChannelList(channels) {
     let html = "";
     const myId = localStorage.getItem("my_user_id");
 
-    const activeChannels = channels.filter(channel => {
+    const activeChannels = channels.filter((channel) => {
         if (channel.active === false) return false;
         if (channel.channel_type === "Group" || channel.server) return true;
         return channel.channel_type === "DirectMessage";
@@ -253,11 +270,18 @@ async function renderChannelList(channels) {
 
     for (const channel of activeChannels) {
         let channelName = channel.name;
-        let iconUrl = '/images/buffer40.gif';
-        const isDM = channel.channel_type === "DirectMessage" || channel.channel_type === "Group" || !channel.server;
+        let iconUrl = "/images/buffer40.gif";
+        const isDM =
+            channel.channel_type === "DirectMessage" ||
+            channel.channel_type === "Group" ||
+            !channel.server;
 
-        if (channel.channel_type === "DirectMessage" || (channel.recipients && channel.recipients.length === 2)) {
-            let otherUserId = channel.recipients?.find(id => id !== myId) || channel.user;
+        if (
+            channel.channel_type === "DirectMessage" ||
+            (channel.recipients && channel.recipients.length === 2)
+        ) {
+            let otherUserId =
+                channel.recipients?.find((id) => id !== myId) || channel.user;
 
             if (otherUserId) {
                 const profile = await getUserProfile(otherUserId);
@@ -268,8 +292,10 @@ async function renderChannelList(channels) {
                     }
                 }
             }
-        }
-        else if (channel.channel_type === "Group" || (channel.recipients && channel.recipients.length > 2)) {
+        } else if (
+            channel.channel_type === "Group" ||
+            (channel.recipients && channel.recipients.length > 2)
+        ) {
             if (channel.icon) {
                 iconUrl = `${STOAT_AUTUMN}/icons/${channel.icon._id}`;
             }
@@ -279,9 +305,11 @@ async function renderChannelList(channels) {
         if (!channelName) channelName = channel._id || "Chat";
         const escapedName = channelName.replace(/'/g, "\\'");
 
-        const closeBtnHTML = isDM ? `
+        const closeBtnHTML = isDM
+            ? `
             <span class="close-channel-btn" onclick="closeChannel(event, '${channel._id}')" title="Close DM">✕</span>
-        ` : '';
+        `
+            : "";
 
         html += `
             <button onclick="openChat('${channel._id}', '${escapedName}')" class="button2 channel-item-btn" data-channel-id="${channel._id}">
@@ -306,7 +334,9 @@ async function closeChannel(event, channelId) {
         btnToClose.remove();
     }
 
-    await stoatFetch(`/channels/${channelId}`, { method: "DELETE" }).catch(() => { });
+    await stoatFetch(`/channels/${channelId}`, { method: "DELETE" }).catch(
+        () => { },
+    );
 
     if (currentChannelId === channelId) {
         openFriendsDashboard();
@@ -315,9 +345,17 @@ async function closeChannel(event, channelId) {
 
 // Synchronous HTML generator (removes microtask queue lag during bulk message rendering)
 function generateMessageHTML(data) {
-    const timeObj = parseUlidTimestamp(data._id);
-    const timeString = timeObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    // Store message in cache for reply lookup
+    if (data && data._id) {
+        messagesCache[data._id] = data;
+    }
 
+    const timeObj = parseUlidTimestamp(data._id);
+    const timeString = timeObj.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+    });
     if (data.system) {
         let systemText = "System action performed.";
         if (data.system.type === "text") {
@@ -336,10 +374,60 @@ function generateMessageHTML(data) {
         `;
     }
 
+    // Render Reply Bar if message contains replies
+    let replyHeaderHTML = "";
+    if (Array.isArray(data.replies) && data.replies.length > 0) {
+        const targetId =
+            typeof data.replies[0] === "string"
+                ? data.replies[0]
+                : data.replies[0]?.id;
+
+        // 1. Look up target message in memory cache, 2. Fall back to DOM element
+        const targetMsg = messagesCache[targetId];
+        const targetElem = targetMsg
+            ? null
+            : document.querySelector(`[data-message-id="${targetId}"]`);
+
+        let targetAuthor = "User";
+        let targetText = "Replying to message";
+        let targetAvatarUrl = "/images/buffer40.gif";
+
+        if (targetMsg) {
+            const authorProfile = usersCache[targetMsg.author];
+            targetAuthor = authorProfile?.username || targetMsg.author || "User";
+            targetText = targetMsg.content || "Attachment / Media";
+            if (authorProfile?.avatar) {
+                targetAvatarUrl = `${STOAT_AUTUMN}/avatars/${authorProfile.avatar._id}`;
+            }
+        } else if (targetElem) {
+            targetAuthor =
+                targetElem.querySelector(".message-author")?.textContent || "User";
+            targetText =
+                targetElem.querySelector(".message-content")?.textContent ||
+                "Replying to message";
+            const bg =
+                targetElem.querySelector(".message-avatar")?.style.backgroundImage;
+            if (bg)
+                targetAvatarUrl = bg.replace(/^url\(["']?/, "").replace(/["']?\)$/, "");
+        }
+
+        replyHeaderHTML = `
+            <div class="message-reply-line" onclick="scrollToMessage('${targetId}')">
+                <div class="reply-spine"></div>
+                <div class="reply-mini-avatar" style="background-image: url('${targetAvatarUrl}');"></div>
+                <span class="reply-author-tag">@${targetAuthor}</span>
+                <span class="reply-snippet-text">${targetText}</span>
+            </div>
+        `;
+    }
+
     let mediaHTML = "";
     if (data.attachments && data.attachments.length > 0) {
-        data.attachments.forEach(file => {
-            if (file.tag === "attachments" || (file.metadata && file.metadata.type === "Image")) {
+        data.attachments.forEach((file) => {
+            if (
+                file.tag === "attachments" ||
+                (file.metadata && file.metadata.type === "Image")
+            ) {
                 mediaHTML += `
                     <div style="margin-top: 6px; display: block;">
                         <div style="display: inline-flex; border-radius: 4px; overflow: hidden; max-width: fit-content; background-color: #2b2d31; vertical-align: bottom;">
@@ -353,10 +441,19 @@ function generateMessageHTML(data) {
         });
     }
 
-    const textHTML = data.content ? `<div class="message-content">${data.content}</div>` : '';
+    const textHTML = data.content
+        ? `<div class="message-content">${data.content}</div>`
+        : "";
     let cleanHTML = "";
 
-    if (lastMessageAuthorId === data.author && lastMessageType === "user") {
+    // Force non-consecutive layout if message is a reply so reply header can render cleanly
+    const isReply = replyHeaderHTML.length > 0;
+
+    if (
+        lastMessageAuthorId === data.author &&
+        lastMessageType === "user" &&
+        !isReply
+    ) {
         cleanHTML = `
             <div class="message-item consecutive" data-message-id="${data._id}" data-author-id="${data.author}">
                 <div class="message-consecutive-spacer">
@@ -371,20 +468,24 @@ function generateMessageHTML(data) {
     } else {
         const authorProfile = usersCache[data.author];
         const authorName = authorProfile?.username || data.author;
-        const avatarUrl = (authorProfile && authorProfile.avatar)
-            ? `${STOAT_AUTUMN}/avatars/${authorProfile.avatar._id}`
-            : '/images/buffer40.gif';
+        const avatarUrl =
+            authorProfile && authorProfile.avatar
+                ? `${STOAT_AUTUMN}/avatars/${authorProfile.avatar._id}`
+                : "/images/buffer40.gif";
 
         cleanHTML = `
             <div class="message-item" data-message-id="${data._id}" data-author-id="${data.author}">
-                <div class="message-avatar" style="background-image: url('${avatarUrl}'); cursor: pointer;" onclick="openUserProfileModal('${data.author}')"></div>
-                <div class="message-details">
-                    <div class="message-header">
-                        <span class="message-author" style="cursor: pointer;" onclick="openUserProfileModal('${data.author}')">${authorName}</span>
-                        <span class="message-timestamp">${timeString}</span>
+                ${replyHeaderHTML}
+                <div class="message-main-row" style="display: flex; gap: 12px; align-items: flex-start;">
+                    <div class="message-avatar" style="background-image: url('${avatarUrl}'); cursor: pointer;" onclick="openUserProfileModal('${data.author}')"></div>
+                    <div class="message-details">
+                        <div class="message-header">
+                            <span class="message-author" style="cursor: pointer;" onclick="openUserProfileModal('${data.author}')">${authorName}</span>
+                            <span class="message-timestamp">${timeString}</span>
+                        </div>
+                        ${textHTML}
+                        ${mediaHTML}
                     </div>
-                    ${textHTML}
-                    ${mediaHTML}
                 </div>
             </div>
         `;
@@ -398,39 +499,56 @@ function generateMessageHTML(data) {
 // Fast channel opener
 async function openChat(channelId, name) {
     currentChannelId = channelId;
-    if (channelMessagesBox) channelMessagesBox.innerHTML = '<div class="placeholder-notice">Loading messages...</div>';
+    // Set loading state inside the message container
+    if (channelMessagesBox) {
+    channelMessagesBox.innerHTML = `
+        <div class="messages-loading-inline">
+            <img src="/images/buffer40.gif" class="messages-loading-gif-sm" alt="Loading...">
+            <span class="messages-loading-text">Loading messages...</span>
+        </div>
+    `;
+}
     if (activeChannelTitle) activeChannelTitle.textContent = name;
     if (channelTextInput) channelTextInput.placeholder = `Message #${name}`;
 
     if (friendsViewLayout) friendsViewLayout.style.display = "none";
     if (activeChatLayout) activeChatLayout.style.display = "block";
 
-    document.querySelectorAll('.sidebar-channels .button2').forEach(btn => {
-        btn.classList.remove('active-channel');
+    document.querySelectorAll(".sidebar-channels .button2").forEach((btn) => {
+        btn.classList.remove("active-channel");
     });
 
     const targetBtn = document.querySelector(`[data-channel-id="${channelId}"]`);
     if (targetBtn) {
-        targetBtn.classList.add('active-channel');
+        targetBtn.classList.add("active-channel");
     }
 
     const history = await stoatFetch(`/channels/${channelId}/messages`);
     if (history) {
-        const messages = Array.isArray(history) ? history : (history.messages || []);
+        const messages = Array.isArray(history) ? history : history.messages || [];
 
         if (history.users && Array.isArray(history.users)) {
-            history.users.forEach(u => { usersCache[u._id] = u; });
+            history.users.forEach((u) => {
+                usersCache[u._id] = u;
+            });
         }
 
-        // Fetch missing message authors in parallel (bounded)
-        const missingUserIds = [...new Set(
-            messages
-                .map(m => m.author)
-                .filter(authorId => authorId && !usersCache[authorId])
-        )].slice(0, 50);
+        // Cache all fetched messages upfront so replies can look up target message contents
+        messages.forEach((msg) => {
+            messagesCache[msg._id] = msg;
+        });
+
+        // Fetch missing message authors in parallel
+        const missingUserIds = [
+            ...new Set(
+                messages
+                    .map((m) => m.author)
+                    .filter((authorId) => authorId && !usersCache[authorId]),
+            ),
+        ].slice(0, 50);
 
         if (missingUserIds.length > 0) {
-            await Promise.all(missingUserIds.map(id => getUserProfile(id)));
+            await Promise.all(missingUserIds.map((id) => getUserProfile(id)));
         }
 
         lastMessageAuthorId = null;
@@ -447,10 +565,7 @@ async function openChat(channelId, name) {
             channelMessagesBox.innerHTML = combinedHTML;
             scrollToBottom();
         }
-    } else if (channelMessagesBox) {
-        channelMessagesBox.innerHTML = '<div class="placeholder-notice">Failed to load messages.</div>';
     }
-
     renderMemberBoard(channelId);
 }
 
@@ -459,10 +574,13 @@ async function renderMemberBoard(channelId) {
 
     // Track active render session; cancels any previous ongoing render loop
     currentMemberBoardChannelId = channelId;
-    memberBoard.innerHTML = '<div class="placeholder-notice">Loading members...</div>';
+    memberBoard.innerHTML =
+        `<div class="members-loading-wrapper">
+            <img src="/images/buffer120.gif" class="panel-loading-gif" alt="Loading members...">
+        </div>`;
 
     const channel = await stoatFetch(`/channels/${channelId}`);
-    
+
     // Abort if channel changed while fetching
     if (currentMemberBoardChannelId !== channelId) return;
     if (!channel) return;
@@ -471,38 +589,51 @@ async function renderMemberBoard(channelId) {
 
     if (channel.server) {
         const responseData = await stoatFetch(`/servers/${channel.server}/members`);
-        
+
         // Abort if channel changed during server fetch
         if (currentMemberBoardChannelId !== channelId) return;
 
         if (responseData) {
-            let membersList = Array.isArray(responseData) ? responseData : (responseData.members || []);
-            
+            let membersList = Array.isArray(responseData)
+                ? responseData
+                : responseData.members || [];
+
             if (Array.isArray(responseData.users)) {
                 for (const u of responseData.users) {
                     if (u && u._id) usersCache[u._id] = u;
                 }
             }
-            
-            userIds = membersList.map(m => {
-                return (m.id && m.id.user) ? m.id.user : (m._id && m._id.user ? m._id.user : m._id);
-            }).filter(Boolean);
+
+            userIds = membersList
+                .map((m) => {
+                    return m.id && m.id.user
+                        ? m.id.user
+                        : m._id && m._id.user
+                            ? m._id.user
+                            : m._id;
+                })
+                .filter(Boolean);
         }
-    } else if (channel.channel_type === "Group" || Array.isArray(channel.recipients)) {
+    } else if (
+        channel.channel_type === "Group" ||
+        Array.isArray(channel.recipients)
+    ) {
         userIds = [...(channel.recipients || [])];
         const myId = localStorage.getItem("my_user_id");
         if (myId && !userIds.includes(myId)) userIds.push(myId);
     } else {
-        memberBoard.innerHTML = '<div class="placeholder-notice">Direct Message</div>';
+        memberBoard.innerHTML =
+            '<div class="placeholder-notice">Direct Message</div>';
         return;
     }
 
     if (userIds.length === 0) {
-        memberBoard.innerHTML = '<div class="placeholder-notice">No members found</div>';
+        memberBoard.innerHTML =
+            '<div class="placeholder-notice">No members found</div>';
         return;
     }
 
-    memberBoard.innerHTML = '';
+    memberBoard.innerHTML = "";
 
     // Safety limit: Don't flood the DOM with thousands of buttons
     const MAX_VISIBLE_MEMBERS = 100;
@@ -518,9 +649,9 @@ async function renderMemberBoard(channelId) {
         if (index >= visibleUserIds.length) {
             // Append "+ X more members" notice if server exceeds capacity
             if (userIds.length > MAX_VISIBLE_MEMBERS) {
-                const overflowNotice = document.createElement('div');
-                overflowNotice.className = 'placeholder-notice';
-                overflowNotice.style.padding = '8px';
+                const overflowNotice = document.createElement("div");
+                overflowNotice.className = "placeholder-notice";
+                overflowNotice.style.padding = "8px";
                 overflowNotice.textContent = `+ ${userIds.length - MAX_VISIBLE_MEMBERS} more members`;
                 memberBoard.appendChild(overflowNotice);
             }
@@ -533,20 +664,21 @@ async function renderMemberBoard(channelId) {
         for (const userId of chunk) {
             const profile = usersCache[userId];
             const name = profile ? profile.username : userId;
-            const avatarUrl = (profile && profile.avatar)
-                ? `${STOAT_AUTUMN}/avatars/${profile.avatar._id}`
-                : '/images/buffer40.gif';
+            const avatarUrl =
+                profile && profile.avatar
+                    ? `${STOAT_AUTUMN}/avatars/${profile.avatar._id}`
+                    : "/images/buffer40.gif";
 
-            const button = document.createElement('button');
-            button.className = 'button2';
+            const button = document.createElement("button");
+            button.className = "button2";
             button.onclick = () => openUserProfileModal(userId);
 
             button.innerHTML = `
                 <div class="item-btn-avatar" style="background-image: url('${avatarUrl}');"></div>
                 <div class="item-btn-label"></div>
             `;
-            
-            button.querySelector('.item-btn-label').textContent = name;
+
+            button.querySelector(".item-btn-label").textContent = name;
             fragment.appendChild(button);
         }
 
@@ -566,23 +698,39 @@ async function openFriendsDashboard() {
     lastMessageAuthorId = null;
     lastMessageType = null;
 
+    // Restore DM Header (Search bar + Friends button)
+    const headerContainer = document.getElementById("sidebarHeaderContainer");
+    if (headerContainer) {
+        headerContainer.innerHTML = `
+            <div class="search-container">
+                <input class="search-input" placeholder="Find or start a conversation">
+            </div>
+            <button class="button2 button2-small" onclick="openFriendsDashboard()">
+                <div class="friends-icon"></div>
+                <div class="friends-text">Friends</div>
+            </button>
+        `;
+    }
+
     if (activeChannelTitle) activeChannelTitle.textContent = "Friends";
 
-    document.querySelectorAll('.sidebar-channels .button2').forEach(btn => {
-        btn.classList.remove('active-channel');
+    document.querySelectorAll(".sidebar-channels .button2").forEach((btn) => {
+        btn.classList.remove("active-channel");
     });
 
     if (activeChatLayout) activeChatLayout.style.display = "none";
     if (friendsViewLayout) friendsViewLayout.style.display = "block";
 
     if (memberBoard) {
-        memberBoard.innerHTML = '<div class="placeholder-notice">Select a conversation to inspect member states.</div>';
+        memberBoard.innerHTML =
+            '<div class="placeholder-notice">Select a conversation to inspect member states.</div>';
     }
     if (!friendsRosterBox) return;
 
-    friendsRosterBox.innerHTML = '<div class="placeholder-notice">Mapping active connections...</div>';
+    friendsRosterBox.innerHTML =
+        '<div class="placeholder-notice">Mapping active connections...</div>';
 
-    const channels = await stoatFetch("/users/dms") || [];
+    const channels = (await stoatFetch("/users/dms")) || [];
     userDMsCache = channels;
     const myId = localStorage.getItem("my_user_id");
     let connectionsFound = 0;
@@ -591,15 +739,20 @@ async function openFriendsDashboard() {
     for (const channel of channels) {
         if (channel.active === false) continue;
 
-        if (channel.channel_type === "DirectMessage" || (channel.recipients && channel.recipients.length === 2)) {
-            const otherUserId = channel.recipients?.find(id => id !== myId) || channel.user;
+        if (
+            channel.channel_type === "DirectMessage" ||
+            (channel.recipients && channel.recipients.length === 2)
+        ) {
+            const otherUserId =
+                channel.recipients?.find((id) => id !== myId) || channel.user;
             if (otherUserId) {
                 connectionsFound++;
                 const profile = await getUserProfile(otherUserId);
                 const name = profile ? profile.username : otherUserId;
-                const avatarUrl = (profile && profile.avatar)
-                    ? `${STOAT_AUTUMN}/avatars/${profile.avatar._id}`
-                    : '/images/buffer40.gif';
+                const avatarUrl =
+                    profile && profile.avatar
+                        ? `${STOAT_AUTUMN}/avatars/${profile.avatar._id}`
+                        : "/images/buffer40.gif";
                 const escapedName = name.replace(/'/g, "\\'");
 
                 const isOnline = profile && profile.online === true;
@@ -630,7 +783,10 @@ async function openFriendsDashboard() {
     }
 
     if (friendsCountLabel) friendsCountLabel.textContent = connectionsFound;
-    friendsRosterBox.innerHTML = connectionsFound > 0 ? html : '<div class="placeholder-notice">No active conversations found.</div>';
+    friendsRosterBox.innerHTML =
+        connectionsFound > 0
+            ? html
+            : '<div class="placeholder-notice">No active conversations found.</div>';
 }
 
 async function sendMessage() {
@@ -640,22 +796,38 @@ async function sendMessage() {
         channelTextInput.focus();
         await stoatFetch(`/channels/${currentChannelId}/messages`, {
             method: "POST",
-            body: JSON.stringify({ content: text })
+            body: JSON.stringify({ content: text }),
         });
     }
 }
 
-// Optimized appendMessageToFeed for real-time incoming WebSocket messages
-async function appendMessageToFeed(data) {
+function appendMessageToFeed(msg) {
     if (!channelMessagesBox) return;
 
-    if (data.author && !usersCache[data.author]) {
-        await getUserProfile(data.author);
+    // Cache the message so reply references can resolve it
+    if (msg && msg._id) {
+        messagesCache[msg._id] = msg;
     }
 
-    const html = await generateMessageHTML(data);
-    channelMessagesBox.insertAdjacentHTML('beforeend', html);
-    scrollToBottom();
+    // Generate HTML using consecutive grouping logic
+    const msgHTML = generateMessageHTML(msg);
+
+    // Append directly to the messages container
+    channelMessagesBox.insertAdjacentHTML("beforeend", msgHTML);
+
+    // Scroll to bottom for live incoming messages
+    channelMessagesBox.scrollTop = channelMessagesBox.scrollHeight;
+}
+
+// Optional helper to jump to the replied message when clicked
+function scrollToMessage(msgId) {
+    if (!msgId) return;
+    const targetElem = document.querySelector(`[data-message-id="${msgId}"]`);
+    if (targetElem) {
+        targetElem.scrollIntoView({ behavior: "smooth", block: "center" });
+        targetElem.classList.add("highlight-message");
+        setTimeout(() => targetElem.classList.remove("highlight-message"), 2000);
+    }
 }
 
 if (channelTextInput) {
@@ -668,11 +840,11 @@ if (channelTextInput) {
 
 // Updated renderServerList to hook up "Add Server" and "Explore" buttons
 function renderServerList(servers = []) {
-    const serverContainer = document.querySelector('.sidebar-servers');
+    const serverContainer = document.querySelector(".sidebar-servers");
     if (!serverContainer) return;
 
     let html = `
-        <button class="server-btn ${!currentServerId ? 'active' : ''}" onclick="openHomeView()" title="Home" id="btnHomeServer">
+        <button class="server-btn ${!currentServerId ? "active" : ""}" onclick="openHomeView()" title="Home" id="btnHomeServer">
             <img class="server-btn-img" src="/images/newLogo256.png" alt="Home">
         </button>
         <a class="server-btn" title="External Site" href="//mistedwafflez.com" target="_blank">
@@ -681,16 +853,16 @@ function renderServerList(servers = []) {
         <div class="sidebar-divider"></div>
     `;
 
-    servers.forEach(server => {
+    servers.forEach((server) => {
         const iconUrl = server.icon
             ? `${STOAT_AUTUMN}/icons/${server.icon._id}`
-            : '/images/buffer40.gif';
+            : "/images/buffer40.gif";
 
-        const escapedName = (server.name || 'Server').replace(/'/g, "\\'");
+        const escapedName = (server.name || "Server").replace(/'/g, "\\'");
         const isActive = currentServerId === server._id;
 
         html += `
-            <button class="server-btn ${isActive ? 'active' : ''}" data-server-id="${server._id}" onclick="openServer('${server._id}', '${escapedName}')" title="${escapedName}">
+            <button class="server-btn ${isActive ? "active" : ""}" data-server-id="${server._id}" onclick="openServer('${server._id}', '${escapedName}')" title="${escapedName}">
                 <img class="server-btn-img" src="${iconUrl}" alt="${escapedName}" onerror="this.onerror=null; this.src='/images/buffer120.gif';">
             </button>
         `;
@@ -712,8 +884,10 @@ let serverChannelsCache = {};
 // 1. Updated initStoatClient() without invalid REST endpoints
 async function initStoatClient() {
     if (logoutBtn) logoutBtn.addEventListener("click", handleLogout);
-    if (openSettingsBtn) openSettingsBtn.addEventListener("click", () => toggleSettings(true));
-    if (closeSettingsBtn) closeSettingsBtn.addEventListener("click", () => toggleSettings(false));
+    if (openSettingsBtn)
+        openSettingsBtn.addEventListener("click", () => toggleSettings(true));
+    if (closeSettingsBtn)
+        closeSettingsBtn.addEventListener("click", () => toggleSettings(false));
 
     document.addEventListener("keydown", (e) => {
         if (e.key === "Escape" && settingsOverlay?.classList.contains("active")) {
@@ -745,7 +919,7 @@ async function initStoatClient() {
     }
 
     assignText(cLoadingText, "Loading direct messages...");
-    userDMsCache = await stoatFetch("/users/dms") || [];
+    userDMsCache = (await stoatFetch("/users/dms")) || [];
     await renderChannelList(userDMsCache);
 
     assignText(cLoadingText, "Setting up dashboard...");
@@ -754,8 +928,6 @@ async function initStoatClient() {
     assignText(cLoadingText, "Connecting to gateway...");
     connectToGateway();
 }
-
-
 
 // Modal for Creating or Joining a Server
 function openAddServerModal() {
@@ -840,7 +1012,10 @@ async function submitJoinServer() {
     const res = await stoatFetch(`/invites/${code}`, { method: "POST" });
     if (res) {
         closeCustomModal();
-        const updatedServers = await stoatFetch("/users/servers") || await stoatFetch("/servers") || [];
+        const updatedServers =
+            (await stoatFetch("/users/servers")) ||
+            (await stoatFetch("/servers")) ||
+            [];
         renderServerList(updatedServers);
 
         if (res.server) {
@@ -858,20 +1033,21 @@ function toggleServerMenu(event, serverId, serverName) {
     event.stopPropagation();
     hideContextMenu();
 
-    const menu = document.getElementById("contextMenu");
-    if (!menu) return;
-
-    menu.innerHTML = `
-        <div class="context-item" onclick="openCreateChannelModal('${serverId}')">➕ Create Channel</div>
-        <div class="context-item" onclick="openCreateInviteModal()">🔗 Create Invite</div>
-        <div class="context-divider"></div>
-        <div class="context-item danger" onclick="confirmLeaveServer('${serverId}', '${serverName.replace(/'/g, "\\'")}')">🚪 Leave Server</div>
-    `;
-
     const rect = event.currentTarget.getBoundingClientRect();
-    menu.style.top = `${rect.bottom + 4}px`;
-    menu.style.left = `${rect.left}px`;
-    menu.style.display = "block";
+    const safeName = serverName.replace(/'/g, "\\'");
+
+    const items = [
+        { label: "Create Invite", action: "openCreateInviteModal()" },
+        { type: "divider" },
+        {
+            label: "Leave Server",
+            action: `confirmLeaveServer('${serverId}', '${safeName}')`,
+            danger: true,
+        },
+    ];
+
+    // Re-use your existing context menu builder & CSS classes
+    showContextMenu(rect.left, rect.bottom + 4, items);
 }
 
 // Modal to Create Channel inside Server
@@ -919,7 +1095,7 @@ async function submitCreateChannel(serverId) {
 
     const res = await stoatFetch(`/servers/${serverId}/channels`, {
         method: "POST",
-        body: JSON.stringify({ name, type })
+        body: JSON.stringify({ name, type }),
     });
 
     if (res) {
@@ -939,7 +1115,9 @@ async function openCreateInviteModal() {
     hideContextMenu();
     if (!currentChannelId) return;
 
-    const res = await stoatFetch(`/channels/${currentChannelId}/invites`, { method: "POST" });
+    const res = await stoatFetch(`/channels/${currentChannelId}/invites`, {
+        method: "POST",
+    });
     if (!res || !res._id) {
         alert("Failed to generate invite.");
         return;
@@ -988,50 +1166,77 @@ function confirmLeaveServer(serverId, serverName) {
     modalOverlay.style.display = "flex";
 }
 
-// Updated openServer() that correctly resolves channel ID strings to channel objects
+// Helper to safely escape HTML strings for titles/names
+function escapeHtml(str) {
+    if (!str) return "";
+    return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+// Updated openServer() that renders the banner and channel list
 async function openServer(serverId, serverName) {
     currentServerId = serverId;
 
-    document.querySelectorAll('.server-btn').forEach(btn => btn.classList.remove('active'));
-    const serverBtn = document.querySelector(`.server-btn[data-server-id="${serverId}"]`);
-    if (serverBtn) serverBtn.classList.add('active');
+    // Highlight server button in sidebar
+    document
+        .querySelectorAll(".server-btn")
+        .forEach((btn) => btn.classList.remove("active"));
+    const serverBtn = document.querySelector(
+        `.server-btn[data-server-id="${serverId}"]`,
+    );
+    if (serverBtn) serverBtn.classList.add("active");
 
-    const headerContainer = document.getElementById('channelSidebarHeader');
+    // Fetch server details first to get banner & channel data
+    const serverRes = await stoatFetch(`/servers/${serverId}`);
+    const serverData = serverRes
+        ? serverRes.server || serverRes
+        : serversCache[serverId];
+
+    if (serverData) {
+        serversCache[serverId] = serverData;
+    }
+
+    const targetServer = serverData || { name: serverName };
+
+    // Render Server Banner Header in sidebar header container
+    const headerContainer = document.getElementById("sidebarHeaderContainer");
     if (headerContainer) {
+        const bannerUrl = targetServer.banner
+            ? `${STOAT_AUTUMN}/banners/${targetServer.banner._id || targetServer.banner}`
+            : null;
+        const displayName = targetServer.name || serverName || "Server";
+
         headerContainer.innerHTML = `
-            <div class="server-header-banner" onclick="toggleServerMenu(event, '${serverId}', '${serverName.replace(/'/g, "\\'")}')">
-                <span class="server-header-name">${serverName}</span>
-                <span class="server-header-arrow">▼</span>
+            <div class="server-header-card ${!bannerUrl ? "no-banner" : ""}" onclick="toggleServerMenu(event, '${serverId}', '${displayName.replace(/'/g, "\\'")}')">
+                ${bannerUrl ? `<img class="server-header-banner" src="${bannerUrl}" alt="Server Banner">` : ""}
+                <span class="server-header-title">${escapeHtml(displayName)}</span>
             </div>
-            <div class="channel-list-divider"></div>
         `;
     }
 
     let channelIds = [];
-
-    // Fetch server details
-    const serverRes = await stoatFetch(`/servers/${serverId}`);
-    if (serverRes) {
-        const serverData = serverRes.server || serverRes;
-        serversCache[serverId] = serverData;
-        
-        if (Array.isArray(serverData.channels)) {
-            channelIds = serverData.channels;
-        }
-    } else if (serversCache[serverId]?.channels) {
-        channelIds = serversCache[serverId].channels;
+    if (targetServer && Array.isArray(targetServer.channels)) {
+        channelIds = targetServer.channels;
     }
 
     // Map raw IDs or objects into full Channel objects from cache
     const channelObjects = channelIds
-        .map(item => typeof item === 'object' ? item : serverChannelsCache[item])
+        .map((item) =>
+            typeof item === "object" ? item : serverChannelsCache[item],
+        )
         .filter(Boolean);
 
     if (channelObjects.length > 0) {
         await renderServerChannelList(channelObjects);
 
         // Auto-open first text channel
-        const firstTextChannel = channelObjects.find(c => c && (c.channel_type === "TextChannel" || !c.channel_type));
+        const firstTextChannel = channelObjects.find(
+            (c) => c && (c.channel_type === "TextChannel" || !c.channel_type),
+        );
         if (firstTextChannel && firstTextChannel._id) {
             openChat(firstTextChannel._id, firstTextChannel.name || "general");
         }
@@ -1058,7 +1263,7 @@ async function submitCreateServer() {
 
     const res = await stoatFetch("/servers/create", {
         method: "POST",
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
     });
 
     if (res && (res.server || res._id)) {
@@ -1139,21 +1344,29 @@ function connectToGateway() {
 
                 // Cache servers
                 if (packet.servers && Array.isArray(packet.servers)) {
-                    packet.servers.forEach(s => { serversCache[s._id] = s; });
+                    packet.servers.forEach((s) => {
+                        serversCache[s._id] = s;
+                    });
                     renderServerList(packet.servers);
                 }
 
                 // Cache all channel objects
                 if (packet.channels && Array.isArray(packet.channels)) {
-                    packet.channels.forEach(c => { serverChannelsCache[c._id] = c; });
+                    packet.channels.forEach((c) => {
+                        serverChannelsCache[c._id] = c;
+                    });
                 }
 
                 // Cache users
                 if (packet.users && Array.isArray(packet.users)) {
-                    packet.users.forEach(u => { usersCache[u._id] = u; });
+                    packet.users.forEach((u) => {
+                        usersCache[u._id] = u;
+                    });
                 }
 
-                setTimeout(() => { dismissLoadingOverlay(); }, 300);
+                setTimeout(() => {
+                    dismissLoadingOverlay();
+                }, 300);
                 break;
 
             case "Message":
@@ -1170,21 +1383,34 @@ function connectToGateway() {
 
             case "MessageUpdate":
                 if (packet.channel === currentChannelId) {
-                    const msgElement = document.querySelector(`[data-message-id="${packet.id}"]`);
+                    const msgElement = document.querySelector(
+                        `[data-message-id="${packet.id}"]`,
+                    );
                     if (msgElement) {
-                        let contentElement = msgElement.querySelector('.message-content');
+                        let contentElement = msgElement.querySelector(".message-content");
                         if (!contentElement) {
-                            const detailsElement = msgElement.querySelector('.message-details');
+                            const detailsElement =
+                                msgElement.querySelector(".message-details");
                             if (detailsElement) {
-                                contentElement = document.createElement('div');
-                                contentElement.className = 'message-content';
-                                detailsElement.insertBefore(contentElement, detailsElement.firstChild);
+                                contentElement = document.createElement("div");
+                                contentElement.className = "message-content";
+                                detailsElement.insertBefore(
+                                    contentElement,
+                                    detailsElement.firstChild,
+                                );
                             }
                         }
-                        if (contentElement && packet.data && packet.data.content !== undefined) {
+                        if (
+                            contentElement &&
+                            packet.data &&
+                            packet.data.content !== undefined
+                        ) {
                             contentElement.textContent = packet.data.content;
-                            if (!msgElement.querySelector('.edited-tag')) {
-                                contentElement.insertAdjacentHTML('beforeend', ' <span class="edited-tag" style="font-size: 11px; color: #949ba4;">(edited)</span>');
+                            if (!msgElement.querySelector(".edited-tag")) {
+                                contentElement.insertAdjacentHTML(
+                                    "beforeend",
+                                    ' <span class="edited-tag" style="font-size: 11px; color: #949ba4;">(edited)</span>',
+                                );
                             }
                         }
                     }
@@ -1193,7 +1419,9 @@ function connectToGateway() {
 
             case "MessageDelete":
                 if (packet.channel === currentChannelId) {
-                    const msgElement = document.querySelector(`[data-message-id="${packet.id}"]`);
+                    const msgElement = document.querySelector(
+                        `[data-message-id="${packet.id}"]`,
+                    );
                     if (msgElement) {
                         msgElement.remove();
                     }
@@ -1203,8 +1431,10 @@ function connectToGateway() {
             case "BulkDelete":
             case "MessageAppend":
                 if (packet.channel === currentChannelId && Array.isArray(packet.ids)) {
-                    packet.ids.forEach(id => {
-                        const msgElement = document.querySelector(`[data-message-id="${id}"]`);
+                    packet.ids.forEach((id) => {
+                        const msgElement = document.querySelector(
+                            `[data-message-id="${id}"]`,
+                        );
                         if (msgElement) msgElement.remove();
                     });
                 }
@@ -1242,9 +1472,64 @@ document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") closeCustomModal();
 });
 
+function promptReplyMessage(msgId, authorName, originalText) {
+    hideContextMenu();
+
+    const modalOverlay = document.getElementById("customModalOverlay");
+    const modalTitle = document.getElementById("modalTitle");
+    const modalBody = document.getElementById("modalBody");
+    const modalActions = document.getElementById("modalActions");
+
+    if (!modalOverlay) return;
+
+    // Sanitize input text for HTML embedding
+    const safeOriginal = (originalText || "").replace(/"/g, "&quot;");
+
+    modalTitle.textContent = "Reply to Message";
+    modalBody.innerHTML = `
+        <div style="font-size: 13px; color: #a69a8f; margin-bottom: 8px;">
+            Replying to <strong style="color: #f5efe9;">${authorName}</strong>: 
+            <span style="font-style: italic;">"${safeOriginal}"</span>
+        </div>
+        <input type="text" id="modalReplyInput" class="modal-input" placeholder="Type your reply..." style="width: 100%;">
+    `;
+
+    modalActions.innerHTML = `
+        <button class="modal-btn modal-btn-secondary" onclick="closeCustomModal()">Cancel</button>
+        <button class="modal-btn modal-btn-primary" id="confirmReplyBtn">Send Reply</button>
+    `;
+
+    modalOverlay.style.display = "flex";
+
+    const replyInput = document.getElementById("modalReplyInput");
+    replyInput.focus();
+
+    const sendReply = async () => {
+        const replyText = replyInput.value.trim();
+        closeCustomModal();
+
+        if (replyText && currentChannelId) {
+            await stoatFetch(`/channels/${currentChannelId}/messages`, {
+                method: "POST",
+                body: JSON.stringify({
+                    content: replyText,
+                    replies: [{ id: msgId, mention: true }],
+                }),
+            });
+        }
+    };
+
+    document.getElementById("confirmReplyBtn").onclick = sendReply;
+    replyInput.onkeydown = (e) => {
+        if (e.key === "Enter") sendReply();
+    };
+}
+
 function promptEditMessage(msgId) {
     hideContextMenu();
-    const msgElem = document.querySelector(`[data-message-id="${msgId}"] .message-content`);
+    const msgElem = document.querySelector(
+        `[data-message-id="${msgId}"] .message-content`,
+    );
     if (!msgElem) return;
 
     const currentText = msgElem.innerText.replace(" (edited)", "");
@@ -1259,7 +1544,7 @@ function promptEditMessage(msgId) {
     modalTitle.textContent = "Edit Message";
     modalBody.innerHTML = `
         <div>Modify your message below:</div>
-        <input type="text" id="modalEditInput" class="modal-input" value="${currentText.replace(/"/g, '&quot;')}">
+        <input type="text" id="modalEditInput" class="modal-input" value="${currentText.replace(/"/g, "&quot;")}">
     `;
 
     modalActions.innerHTML = `
@@ -1279,7 +1564,7 @@ function promptEditMessage(msgId) {
         if (newText && newText !== currentText) {
             await stoatFetch(`/channels/${currentChannelId}/messages/${msgId}`, {
                 method: "PATCH",
-                body: JSON.stringify({ content: newText })
+                body: JSON.stringify({ content: newText }),
             });
         }
     };
@@ -1313,7 +1598,7 @@ function deleteMessageAction(msgId) {
     document.getElementById("confirmDeleteBtn").onclick = async () => {
         closeCustomModal();
         await stoatFetch(`/channels/${currentChannelId}/messages/${msgId}`, {
-            method: "DELETE"
+            method: "DELETE",
         });
     };
 }
@@ -1323,7 +1608,7 @@ function showContextMenu(x, y, items) {
     if (!menuEl) return;
 
     let html = "";
-    items.forEach(item => {
+    items.forEach((item) => {
         if (item.type === "divider") {
             html += `<div class="context-menu-divider"></div>`;
         } else {
@@ -1355,9 +1640,13 @@ function hideContextMenu() {
 
 async function copyMessageContent(msgId) {
     hideContextMenu();
-    const msgElem = document.querySelector(`[data-message-id="${msgId}"] .message-content`);
+    const msgElem = document.querySelector(
+        `[data-message-id="${msgId}"] .message-content`,
+    );
     if (msgElem) {
-        await navigator.clipboard.writeText(msgElem.innerText.replace(" (edited)", ""));
+        await navigator.clipboard.writeText(
+            msgElem.innerText.replace(" (edited)", ""),
+        );
     }
 }
 
@@ -1372,25 +1661,43 @@ document.addEventListener("contextmenu", (e) => {
         e.preventDefault();
         const msgId = messageItem.dataset.messageId;
         const authorId = messageItem.dataset.authorId;
-        const myId = localStorage.getItem("my_user_id");
 
+        const authorElem = messageItem.querySelector(".message-author");
+        const authorName = authorElem ? authorElem.innerText : "User";
+
+        const contentElem = messageItem.querySelector(".message-content");
+        const msgText = contentElem ? contentElem.innerText : "";
+
+        const myId = localStorage.getItem("my_user_id");
         const isMyMessage = authorId === myId;
 
+        const safeAuthor = authorName.replace(/'/g, "\\'");
+        const safeText = msgText.replace(/'/g, "\\'").replace(/\n/g, " ");
+
         const menuItems = [
+            {
+                label: "Reply",
+                action: `promptReplyMessage('${msgId}', '${safeAuthor}', '${safeText}')`,
+            },
             { label: "View Profile", action: `openUserProfileModal('${authorId}')` },
             { label: "Copy Text", action: `copyMessageContent('${msgId}')` },
-            { label: "Copy Message ID", action: `copyMessageId('${msgId}')` }
+            { label: "Copy Message ID", action: `copyMessageId('${msgId}')` },
         ];
 
         if (isMyMessage) {
             menuItems.push({ type: "divider" });
-            menuItems.push({ label: "Edit Message", action: `promptEditMessage('${msgId}')` });
-            menuItems.push({ label: "Delete Message", action: `deleteMessageAction('${msgId}')`, danger: true });
+            menuItems.push({
+                label: "Edit Message",
+                action: `promptEditMessage('${msgId}')`,
+            });
+            menuItems.push({
+                label: "Delete Message",
+                action: `deleteMessageAction('${msgId}')`,
+                danger: true,
+            });
         }
 
         showContextMenu(e.clientX, e.clientY, menuItems);
-    } else {
-        hideContextMenu();
     }
 });
 
