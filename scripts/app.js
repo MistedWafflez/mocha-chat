@@ -38,6 +38,181 @@ let lastMessageType = null;
 let currentMemberBoardChannelId = null;
 let messagesCache = {}; // Caches messages so reply headers can resolve target message details
 
+const LOCALES = {
+    "en-US": "English (US)",
+    "fr-CA": "Français (Canada)"
+};
+
+const TRANSLATIONS = {
+    "en-US": {
+        friends: "Friends",
+        textChannels: "TEXT CHANNELS",
+        noTextChannels: "No text channels available",
+        messagePlaceholder: "Message #",
+        aboutMe: "About Me",
+        noBio: "No bio provided.",
+        members: "Members",
+        close: "Close",
+        loadingMessages: "Loading messages...",
+        loadingMembers: "Loading members...",
+        findOrStartConversation: "Find or start a conversation",
+        allFriends: "All Friends",
+        directNetworkingDashboard: "Your direct networking dashboard framework.",
+        groupChat: "Group Chat",
+        chat: "Chat",
+        closeDm: "Close DM",
+        systemAction: "System action performed.",
+        renamedChannel: "renamed the channel to",
+        replyingToMessage: "Replying to message",
+        attachmentMedia: "Attachment / Media",
+        userSettings: "User Settings",
+        myAccount: "My Account",
+        logOut: "Log Out",
+        languageRegion: "Language & Region",
+        stoatMember: "Stoat Member",
+        online: "Online",
+        offline: "Offline",
+        reply: "Reply",
+        viewProfile: "View Profile",
+        copyText: "Copy Text",
+        copyMessageId: "Copy Message ID",
+        editMessage: "Edit Message",
+        deleteMessage: "Delete Message",
+        directMessageNotice: "Direct Message",
+        noMembersFound: "No members found",
+        moreMembers: "more members",
+        username: "Username",
+        minimize: "Minimize",
+        maximize: "Maximize",
+        selectConversationNotice: "Select a conversation to inspect member states.",
+        mappingConnections: "Mapping active connections...",
+        waiting: "Waiting",
+        authenticatingSession: "Authenticating session...",
+        fetchingServersState: "Fetching servers & user state...",
+        edited: "edited",
+        verifyingCredentials: "Verifying credentials...",
+        authFailedRedirecting: "Authentication failed. Redirecting...",
+        loadingDirectMessages: "Loading direct messages...",
+        settingUpDashboard: "Setting up dashboard...",
+        connectingToGateway: "Connecting to gateway...",
+        message: "Message",
+        noActiveConversations: "No active conversations found.",
+        replyToMessage: "Reply to Message",
+        replyingTo: "Replying to",
+        typeYourReply: "Type your reply...",
+        cancel: "Cancel",
+        sendReply: "Send Reply",
+        userProfileTitle: "User Profile"
+    },
+    "fr-CA": {
+        friends: "Amis",
+        textChannels: "SALONS TEXTUELS",
+        noTextChannels: "Aucun salon textuel disponible",
+        messagePlaceholder: "Envoyer un message dans #",
+        aboutMe: "À propos de moi",
+        noBio: "Aucune biographie fournie.",
+        members: "Membres",
+        close: "Fermer",
+        loadingMessages: "Chargement des messages...",
+        loadingMembers: "Chargement des membres...",
+        findOrStartConversation: "Rechercher ou démarrer une conversation",
+        allFriends: "Tous les amis",
+        directNetworkingDashboard: "Votre tableau de bord réseau direct.",
+        groupChat: "Groupe de discussion",
+        chat: "Discussion",
+        closeDm: "Fermer le message privé",
+        systemAction: "Action système effectuée.",
+        renamedChannel: "a renommé le salon en",
+        replyingToMessage: "En réponse au message",
+        attachmentMedia: "Pièce jointe / Média",
+        userSettings: "Paramètres utilisateur",
+        myAccount: "Mon compte",
+        logOut: "Se déconnecter",
+        languageRegion: "Langue et région",
+        stoatMember: "Membre Stoat",
+        online: "En ligne",
+        offline: "Hors ligne",
+        reply: "Répondre",
+        viewProfile: "Voir le profil",
+        copyText: "Copier le texte",
+        copyMessageId: "Copier l'identifiant du message",
+        editMessage: "Modifier le message",
+        deleteMessage: "Supprimer le message",
+        directMessageNotice: "Message direct",
+        noMembersFound: "Aucun membre trouvé",
+        moreMembers: "autres membres",
+        username: "Nom d'utilisateur",
+        minimize: "Réduire",
+        maximize: "Agrandir",
+        selectConversationNotice: "Sélectionnez une conversation pour inspecter les membres.",
+        mappingConnections: "Cartographie des connexions actives...",
+        waiting: "En attente",
+        authenticatingSession: "Authentification de la session...",
+        fetchingServersState: "Récupération des serveurs et de l'état utilisateur...",
+        edited: "modifié",
+        verifyingCredentials: "Vérification des identifiants...",
+        authFailedRedirecting: "Échec de l'authentification. Redirection...",
+        loadingDirectMessages: "Chargement des messages directs...",
+        settingUpDashboard: "Configuration du tableau de bord...",
+        connectingToGateway: "Connexion à la passerelle...",
+        message: "Message",
+        noActiveConversations: "Aucune conversation active trouvée.",
+        replyToMessage: "Répondre au message",
+        replyingTo: "En réponse à",
+        typeYourReply: "Tapez votre réponse...",
+        cancel: "Annuler",
+        sendReply: "Envoyer la réponse",
+        userProfileTitle: "Profil utilisateur"
+    }
+};
+
+let currentLocale = localStorage.getItem("selected_locale") || "en-US";
+
+function t(key) {
+    return TRANSLATIONS[currentLocale]?.[key] || TRANSLATIONS["en-US"][key] || key;
+}
+
+window.setLocale = function (localeCode) {
+    if (LOCALES[localeCode]) {
+        currentLocale = localeCode;
+        localStorage.setItem("selected_locale", localeCode);
+
+        updatePageTranslations();
+
+        if (typeof currentChannelId !== "undefined" && currentChannelId) {
+            const activeBtn = document.querySelector(`[data-channel-id="${currentChannelId}"]`);
+            const name = activeBtn ? activeBtn.querySelector('.item-btn-label')?.textContent : "Chat";
+            openChat(currentChannelId, name || "Chat");
+        } else if (typeof openFriendsDashboard === "function") {
+            openFriendsDashboard();
+        }
+    }
+};
+
+function updatePageTranslations() {
+    document.querySelectorAll("[data-i18n]").forEach((el) => {
+        const key = el.getAttribute("data-i18n");
+        if (key) el.textContent = t(key);
+    });
+
+    document.querySelectorAll("[data-i18n-placeholder]").forEach((el) => {
+        const key = el.getAttribute("data-i18n-placeholder");
+        if (key) el.placeholder = t(key);
+    });
+
+    document.querySelectorAll("[data-i18n-title]").forEach((el) => {
+        const key = el.getAttribute("data-i18n-title");
+        if (key) el.title = t(key);
+    });
+}
+
+function setLoadingText(key) {
+    if (cLoadingText) {
+        cLoadingText.dataset.i18nKey = key;
+        cLoadingText.textContent = t(key);
+    }
+}
+
 function assignText(element, value) {
     if (element) element.textContent = value;
 }
@@ -97,6 +272,12 @@ function toggleSettings(show) {
                 settingsAvatar.style.backgroundImage = `url(${STOAT_AUTUMN}/avatars/${me.avatar._id})`;
             }
         }
+
+        const localeSelect = document.getElementById("localeSelect");
+        if (localeSelect) {
+            localeSelect.value = currentLocale;
+        }
+
         settingsOverlay.classList.add("active");
     } else {
         settingsOverlay.classList.remove("active");
@@ -167,16 +348,15 @@ async function openUserProfileModal(userId) {
         ? `${STOAT_AUTUMN}/${bannerTag}/${bannerId}`
         : null;
 
-    const presence =
-        user.status?.presence || (user.online ? "Online" : "Offline");
+    const presence = user.status?.presence || (user.online ? t("online") : t("offline"));
     const statusText = user.status?.text
         ? `${presence} — ${user.status.text}`
         : presence;
     const statusColor = user.online ? "#23a55a" : "#80848e";
 
-    const bioText = profile?.content || "No bio provided.";
+    const bioText = profile?.content || t("noBio");
 
-    modalTitle.textContent = user.username;
+    modalTitle.textContent = t("userProfileTitle");
 
     modalBody.innerHTML = `
         <div class="user-profile-card">
@@ -190,14 +370,14 @@ async function openUserProfileModal(userId) {
                 <div class="profile-card-username">${user.username}</div>
                 <div class="profile-card-status-text">${statusText}</div>
                 <div class="profile-card-divider"></div>
-                <div class="profile-card-section-title">About Me</div>
+                <div class="profile-card-section-title">${t("aboutMe")}</div>
                 <div class="profile-card-bio">${bioText}</div>
             </div>
         </div>
     `;
 
     modalActions.innerHTML = `
-        <button class="modal-btn modal-btn-secondary" onclick="closeCustomModal()">Close</button>
+        <button class="modal-btn modal-btn-secondary" onclick="closeCustomModal()">${t("close")}</button>
     `;
 
     modalOverlay.style.display = "flex";
@@ -213,15 +393,14 @@ async function openHomeView() {
 
     const headerContainer = document.getElementById("channelSidebarHeader");
     if (headerContainer) {
-        headerContainer.innerHTML = `
+        sidebarHeader.innerHTML = `
             <div class="search-container">
-                <input class="search-input" placeholder="Find or start a conversation">
+                <input class="search-input" placeholder="${t("findOrStartConversation")}">
             </div>
             <button class="button2 button2-small" onclick="openFriendsDashboard()">
                 <div class="friends-icon"></div>
-                <div class="friends-text">Friends</div>
+                <div class="friends-text">${t("friends")}</div>
             </button>
-            <div class="channel-list-divider"></div>
         `;
     }
 
@@ -238,7 +417,7 @@ async function renderServerChannelList(channels) {
     );
 
     if (textChannels.length > 0) {
-        html += `<div class="channel-category-label">TEXT CHANNELS</div>`;
+        html += `<div class="channel-category-label">${t("textChannels")}</div>`;
         for (const channel of textChannels) {
             const channelName = channel.name || "channel";
             const escapedName = channelName.replace(/'/g, "\\'");
@@ -251,7 +430,7 @@ async function renderServerChannelList(channels) {
             `;
         }
     } else {
-        html = `<div class="placeholder-notice">No text channels available</div>`;
+        html = `<div class="placeholder-notice">${t("noTextChannels")}</div>`;
     }
 
     chatsList.innerHTML = html;
@@ -270,6 +449,13 @@ async function renderChannelList(channels) {
 
     for (const channel of activeChannels) {
         let channelName = channel.name;
+        if (!channelName) {
+            if (channel.channel_type === "DirectMessage") {
+                channelName = t("directMessageNotice");
+            } else if (channel.channel_type === "Group") {
+                channelName = t("groupChat");
+            }
+        }
         let iconUrl = "/images/buffer40.gif";
         const isDM =
             channel.channel_type === "DirectMessage" ||
@@ -307,7 +493,7 @@ async function renderChannelList(channels) {
 
         const closeBtnHTML = isDM
             ? `
-            <span class="close-channel-btn" onclick="closeChannel(event, '${channel._id}')" title="Close DM">✕</span>
+            <span class="close-channel-btn" onclick="closeChannel(event, '${channel._id}')" title="${t("closeDm")}">✕</span>
         `
             : "";
 
@@ -357,7 +543,7 @@ function generateMessageHTML(data) {
         hour12: false,
     });
     if (data.system) {
-        let systemText = "System action performed.";
+        let systemText = t("systemAction");
         if (data.system.type === "text") {
             systemText = data.system.content;
         } else if (data.system.type === "channel_renamed") {
@@ -388,14 +574,14 @@ function generateMessageHTML(data) {
             ? null
             : document.querySelector(`[data-message-id="${targetId}"]`);
 
-        let targetAuthor = "User";
-        let targetText = "Replying to message";
+        let targetAuthor = t("username");
+        let targetText = t("replyingToMessage");
         let targetAvatarUrl = "/images/buffer40.gif";
 
         if (targetMsg) {
             const authorProfile = usersCache[targetMsg.author];
             targetAuthor = authorProfile?.username || targetMsg.author || "User";
-            targetText = targetMsg.content || "Attachment / Media";
+            targetText = targetMsg.content || t("attachmentMedia");
             if (authorProfile?.avatar) {
                 targetAvatarUrl = `${STOAT_AUTUMN}/avatars/${authorProfile.avatar._id}`;
             }
@@ -499,17 +685,16 @@ function generateMessageHTML(data) {
 // Fast channel opener
 async function openChat(channelId, name) {
     currentChannelId = channelId;
-    // Set loading state inside the message container
     if (channelMessagesBox) {
-    channelMessagesBox.innerHTML = `
+        channelMessagesBox.innerHTML = `
         <div class="messages-loading-inline">
             <img src="/images/buffer40.gif" class="messages-loading-gif-sm" alt="Loading...">
-            <span class="messages-loading-text">Loading messages...</span>
+            <span class="messages-loading-text">${t("loadingMessages")}</span>
         </div>
     `;
-}
+    }
+    if (channelTextInput) channelTextInput.placeholder = `${t("messagePlaceholder")}${name}`;
     if (activeChannelTitle) activeChannelTitle.textContent = name;
-    if (channelTextInput) channelTextInput.placeholder = `Message #${name}`;
 
     if (friendsViewLayout) friendsViewLayout.style.display = "none";
     if (activeChatLayout) activeChatLayout.style.display = "block";
@@ -622,14 +807,12 @@ async function renderMemberBoard(channelId) {
         const myId = localStorage.getItem("my_user_id");
         if (myId && !userIds.includes(myId)) userIds.push(myId);
     } else {
-        memberBoard.innerHTML =
-            '<div class="placeholder-notice">Direct Message</div>';
+        memberBoard.innerHTML = `<div class="placeholder-notice">${t("directMessageNotice")}</div>`;
         return;
     }
 
     if (userIds.length === 0) {
-        memberBoard.innerHTML =
-            '<div class="placeholder-notice">No members found</div>';
+        memberBoard.innerHTML = `<div class="placeholder-notice">${t("noMembersFound")}</div>`;
         return;
     }
 
@@ -652,7 +835,7 @@ async function renderMemberBoard(channelId) {
                 const overflowNotice = document.createElement("div");
                 overflowNotice.className = "placeholder-notice";
                 overflowNotice.style.padding = "8px";
-                overflowNotice.textContent = `+ ${userIds.length - MAX_VISIBLE_MEMBERS} more members`;
+                overflowNotice.textContent = `+ ${userIds.length - MAX_VISIBLE_MEMBERS} ${t("moreMembers")}`;
                 memberBoard.appendChild(overflowNotice);
             }
             return;
@@ -702,17 +885,18 @@ async function openFriendsDashboard() {
     const headerContainer = document.getElementById("sidebarHeaderContainer");
     if (headerContainer) {
         headerContainer.innerHTML = `
-            <div class="search-container">
-                <input class="search-input" placeholder="Find or start a conversation">
-            </div>
-            <button class="button2 button2-small" onclick="openFriendsDashboard()">
-                <div class="friends-icon"></div>
-                <div class="friends-text">Friends</div>
-            </button>
-        `;
+    <div class="search-container">
+        <input class="search-input" placeholder="${t("findOrStartConversation")}">
+    </div>
+    <button class="button2 button2-small" onclick="openFriendsDashboard()">
+        <div class="friends-icon"></div>
+        <div class="friends-text">${t("friends")}</div>
+    </button>
+    <div class="channel-list-divider"></div>
+`;
     }
 
-    if (activeChannelTitle) activeChannelTitle.textContent = "Friends";
+    if (activeChannelTitle) activeChannelTitle.textContent = t("friends");
 
     document.querySelectorAll(".sidebar-channels .button2").forEach((btn) => {
         btn.classList.remove("active-channel");
@@ -722,13 +906,12 @@ async function openFriendsDashboard() {
     if (friendsViewLayout) friendsViewLayout.style.display = "block";
 
     if (memberBoard) {
-        memberBoard.innerHTML =
-            '<div class="placeholder-notice">Select a conversation to inspect member states.</div>';
+        memberBoard.innerHTML = `<div class="placeholder-notice">${t("selectConversationNotice")}</div>`;
     }
+
     if (!friendsRosterBox) return;
 
-    friendsRosterBox.innerHTML =
-        '<div class="placeholder-notice">Mapping active connections...</div>';
+    friendsRosterBox.innerHTML = `<div class="placeholder-notice">${t("mappingConnections")}</div>`;
 
     const channels = (await stoatFetch("/users/dms")) || [];
     userDMsCache = channels;
@@ -756,7 +939,7 @@ async function openFriendsDashboard() {
                 const escapedName = name.replace(/'/g, "\\'");
 
                 const isOnline = profile && profile.online === true;
-                const statusText = isOnline ? "Online" : "Offline";
+                const statusText = isOnline ? t("online") : t("offline");
                 const labelColor = isOnline ? "#23a55a" : "#949ba4";
                 const badgeColor = isOnline ? "#23a55a" : "#80848e";
 
@@ -774,7 +957,7 @@ async function openFriendsDashboard() {
                             </div>
                         </div>
                         <button onclick="openChat('${channel._id}', '${escapedName}')" style="background-color: #2b2d31; color: #b5bac1; padding: 6px 14px; border-radius: 4px; font-size: 13px; font-weight: 500;">
-                            Message
+                            ${t("message")}
                         </button>
                     </div>
                 `;
@@ -786,7 +969,7 @@ async function openFriendsDashboard() {
     friendsRosterBox.innerHTML =
         connectionsFound > 0
             ? html
-            : '<div class="placeholder-notice">No active conversations found.</div>';
+            : `<div class="placeholder-notice">${t("noActiveConversations")}</div>`;
 }
 
 async function sendMessage() {
@@ -888,11 +1071,9 @@ function renderServerList(servers = []) {
     serverContainer.innerHTML = html;
 }
 
-// Add global caches for servers and server channels
 let serversCache = {};
 let serverChannelsCache = {};
 
-// 1. Updated initStoatClient() without invalid REST endpoints
 async function initStoatClient() {
     if (logoutBtn) logoutBtn.addEventListener("click", handleLogout);
     if (openSettingsBtn)
@@ -911,11 +1092,11 @@ async function initStoatClient() {
         return;
     }
 
-    assignText(cLoadingText, "Verifying credentials...");
+    assignText(cLoadingText, t("verifyingCredentials"));
 
     const me = await stoatFetch("/users/@me");
     if (!me) {
-        assignText(cLoadingText, "Authentication failed. Redirecting...");
+        assignText(cLoadingText, t("authFailedRedirecting"));
         window.location.href = "/login";
         return;
     }
@@ -924,23 +1105,22 @@ async function initStoatClient() {
     usersCache[me._id] = me;
 
     assignText(displayNameDisplay, me.username);
-    assignText(statusDisplay, "Online");
+    assignText(statusDisplay, t("online"));
     if (profileNavigationButtom && me.avatar) {
         profileNavigationButtom.style.backgroundImage = `url(${STOAT_AUTUMN}/avatars/${me.avatar._id})`;
     }
 
-    assignText(cLoadingText, "Loading direct messages...");
+    assignText(cLoadingText, t("loadingDirectMessages"));
     userDMsCache = (await stoatFetch("/users/dms")) || [];
     await renderChannelList(userDMsCache);
 
-    assignText(cLoadingText, "Setting up dashboard...");
+    assignText(cLoadingText, t("settingUpDashboard"));
     await openFriendsDashboard();
 
-    assignText(cLoadingText, "Connecting to gateway...");
+    assignText(cLoadingText, t("connectingToGateway"));
     connectToGateway();
 }
 
-// Modal for Creating or Joining a Server
 function openAddServerModal() {
     hideContextMenu();
     const modalOverlay = document.getElementById("customModalOverlay");
@@ -1337,7 +1517,7 @@ function connectToGateway() {
 
     stoatWS.onopen = () => {
         console.log("Connected to Stoat Gateway. Authenticating...");
-        assignText(cLoadingText, "Authenticating session...");
+        assignText(cLoadingText, t("authenticatingSession"));
         stoatWS.send(JSON.stringify({ type: "Authenticate", token: STOAT_TOKEN }));
     };
 
@@ -1347,7 +1527,7 @@ function connectToGateway() {
         switch (packet.type) {
             case "Authenticated":
                 console.log("Successfully Authenticated with Gateway!");
-                assignText(cLoadingText, "Fetching servers & user state...");
+                assignText(cLoadingText, t("fetchingServersState"));
                 break;
 
             case "Ready":
@@ -1420,7 +1600,7 @@ function connectToGateway() {
                             if (!msgElement.querySelector(".edited-tag")) {
                                 contentElement.insertAdjacentHTML(
                                     "beforeend",
-                                    ' <span class="edited-tag" style="font-size: 11px; color: #949ba4;">(edited)</span>',
+                                    ` <span class="edited-tag" style="font-size: 11px; color: #949ba4;">(${t("edited")})</span>`,
                                 );
                             }
                         }
@@ -1496,18 +1676,18 @@ function promptReplyMessage(msgId, authorName, originalText) {
     // Sanitize input text for HTML embedding
     const safeOriginal = (originalText || "").replace(/"/g, "&quot;");
 
-    modalTitle.textContent = "Reply to Message";
+    modalTitle.textContent = t("replyToMessage");
     modalBody.innerHTML = `
         <div style="font-size: 13px; color: #a69a8f; margin-bottom: 8px;">
-            Replying to <strong style="color: #f5efe9;">${authorName}</strong>: 
+            ${t("replyingTo")} <strong style="color: #f5efe9;">${authorName}</strong>: 
             <span style="font-style: italic;">"${safeOriginal}"</span>
         </div>
-        <input type="text" id="modalReplyInput" class="modal-input" placeholder="Type your reply..." style="width: 100%;">
+        <input type="text" id="modalReplyInput" class="modal-input" placeholder="${t("typeYourReply")}" style="width: 100%;">
     `;
 
     modalActions.innerHTML = `
-        <button class="modal-btn modal-btn-secondary" onclick="closeCustomModal()">Cancel</button>
-        <button class="modal-btn modal-btn-primary" id="confirmReplyBtn">Send Reply</button>
+        <button class="modal-btn modal-btn-secondary" onclick="closeCustomModal()">${t("cancel")}</button>
+        <button class="modal-btn modal-btn-primary" id="confirmReplyBtn">${t("sendReply")}</button>
     `;
 
     modalOverlay.style.display = "flex";
@@ -1687,22 +1867,22 @@ document.addEventListener("contextmenu", (e) => {
 
         const menuItems = [
             {
-                label: "Reply",
+                label: t("reply"),
                 action: `promptReplyMessage('${msgId}', '${safeAuthor}', '${safeText}')`,
             },
-            { label: "View Profile", action: `openUserProfileModal('${authorId}')` },
-            { label: "Copy Text", action: `copyMessageContent('${msgId}')` },
-            { label: "Copy Message ID", action: `copyMessageId('${msgId}')` },
+            { label: t("viewProfile"), action: `openUserProfileModal('${authorId}')` },
+            { label: t("copyText"), action: `copyMessageContent('${msgId}')` },
+            { label: t("copyMessageId"), action: `copyMessageId('${msgId}')` },
         ];
 
         if (isMyMessage) {
             menuItems.push({ type: "divider" });
             menuItems.push({
-                label: "Edit Message",
+                label: t("editMessage"),
                 action: `promptEditMessage('${msgId}')`,
             });
             menuItems.push({
-                label: "Delete Message",
+                label: t("deleteMessage"),
                 action: `deleteMessageAction('${msgId}')`,
                 danger: true,
             });
@@ -1713,5 +1893,5 @@ document.addEventListener("contextmenu", (e) => {
 });
 
 document.addEventListener("click", () => hideContextMenu());
-
+updatePageTranslations();
 initStoatClient();

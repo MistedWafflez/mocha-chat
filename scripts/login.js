@@ -1,4 +1,4 @@
-const STOAT_API_URL = "https://api.revolt.chat";
+const STOAT_API_URL = "https://stoat.chat/api";
 
 // UI Elements
 const usernameInput = document.getElementById("usernameInput");
@@ -44,15 +44,20 @@ function showLoginUI(e) {
     currentMode = "LOGIN";
     clearStatus();
 
-    cardTitle.textContent = "Welcome back!";
-    cardSubtitle.textContent = "Glad to see you around!";
+    cardTitle.setAttribute("data-i18n", "welcomeBack");
+    cardTitle.textContent = t("welcomeBack");
+
+    cardSubtitle.setAttribute("data-i18n", "gladToSeeYou");
+    cardSubtitle.textContent = t("gladToSeeYou");
 
     emailGroup.style.display = "";
     passwordGroup.style.display = "";
     tokenGroup.style.display = "none";
     newPasswordGroup.style.display = "none";
 
-    loginButton.textContent = "Login";
+    loginButton.setAttribute("data-i18n", "loginBtn");
+    loginButton.textContent = t("loginBtn");
+
     footerText.style.display = "";
     backToLoginText.style.display = "none";
 }
@@ -62,15 +67,20 @@ function showForgotPasswordUI(e) {
     currentMode = "FORGOT_REQ";
     clearStatus();
 
-    cardTitle.textContent = "Reset Password";
-    cardSubtitle.textContent = "Enter your email to receive a password reset token.";
+    cardTitle.setAttribute("data-i18n", "resetPasswordTitle");
+    cardTitle.textContent = t("resetPasswordTitle");
+
+    cardSubtitle.setAttribute("data-i18n", "resetPasswordSubtitle");
+    cardSubtitle.textContent = t("resetPasswordSubtitle");
 
     emailGroup.style.display = "";
     passwordGroup.style.display = "none";
     tokenGroup.style.display = "none";
     newPasswordGroup.style.display = "none";
 
-    loginButton.textContent = "Send Reset Code";
+    loginButton.setAttribute("data-i18n", "sendResetCodeBtn");
+    loginButton.textContent = t("sendResetCodeBtn");
+
     footerText.style.display = "none";
     backToLoginText.style.display = "";
 }
@@ -79,15 +89,20 @@ function showResetConfirmUI() {
     currentMode = "FORGOT_CONFIRM";
     clearStatus();
 
-    cardTitle.textContent = "Enter New Password";
-    cardSubtitle.textContent = "Check your email for the reset token and enter it below.";
+    cardTitle.setAttribute("data-i18n", "enterNewPasswordTitle");
+    cardTitle.textContent = t("enterNewPasswordTitle");
+
+    cardSubtitle.setAttribute("data-i18n", "enterNewPasswordSubtitle");
+    cardSubtitle.textContent = t("enterNewPasswordSubtitle");
 
     emailGroup.style.display = "none";
     passwordGroup.style.display = "none";
     tokenGroup.style.display = "";
     newPasswordGroup.style.display = "";
 
-    loginButton.textContent = "Update Password";
+    loginButton.setAttribute("data-i18n", "updatePasswordBtn");
+    loginButton.textContent = t("updatePasswordBtn");
+
     footerText.style.display = "none";
     backToLoginText.style.display = "";
 }
@@ -111,7 +126,7 @@ async function submitLogin() {
     const password = passwordInput.value;
 
     if (!identity || !password) {
-        updateLoginStatus("Username/Email and password are required.");
+        updateLoginStatus(t("credentialsRequired"));
         return;
     }
 
@@ -149,16 +164,16 @@ async function submitLogin() {
             localStorage.setItem("stoat_token", data.token);
             window.location.href = "/app";
         } else if (data.type === "AccountUnverified") {
-            updateLoginStatus("Account unverified. Check your email for verification.");
+            updateLoginStatus(t("accountUnverified"));
             resetUI();
         } else {
-            const errorMsg = data.type ? `Error: ${data.type}` : "Invalid credentials.";
+            const errorMsg = data.type ? `${t("errorPrefix")}${data.type}` : t("invalidCredentials");
             updateLoginStatus(errorMsg);
             resetUI();
         }
     } catch (error) {
         console.error("Login request failed:", error);
-        updateLoginStatus("Server connection failed.");
+        updateLoginStatus(t("serverConnectionFailed"));
         resetUI();
     }
 }
@@ -169,7 +184,7 @@ async function requestPasswordReset() {
 
     const email = usernameInput.value.trim();
     if (!email) {
-        updateLoginStatus("Please enter your email address.");
+        updateLoginStatus(t("enterEmailRequired"));
         return;
     }
 
@@ -185,15 +200,15 @@ async function requestPasswordReset() {
         if (response.ok) {
             resetUI();
             showResetConfirmUI();
-            updateLoginStatus("Reset code sent! Check your inbox.", false);
+            updateLoginStatus(t("resetCodeSent"), false);
         } else {
             const data = await response.json();
-            updateLoginStatus(data.type ? `Error: ${data.type}` : "Failed to request reset.");
+            updateLoginStatus(data.type ? `${t("errorPrefix")}${data.type}` : t("failedRequestReset"));
             resetUI();
         }
     } catch (error) {
         console.error("Password reset request failed:", error);
-        updateLoginStatus("Server connection failed.");
+        updateLoginStatus(t("serverConnectionFailed"));
         resetUI();
     }
 }
@@ -206,7 +221,7 @@ async function confirmPasswordReset() {
     const newPassword = newPasswordInput.value;
 
     if (!token || !newPassword) {
-        updateLoginStatus("Token and new password are required.");
+        updateLoginStatus(t("tokenAndPasswordRequired"));
         return;
     }
 
@@ -225,15 +240,15 @@ async function confirmPasswordReset() {
         if (response.ok) {
             resetUI();
             showLoginUI();
-            updateLoginStatus("Password successfully reset! Please log in.", false);
+            updateLoginStatus(t("passwordResetSuccess"), false);
         } else {
             const data = await response.json();
-            updateLoginStatus(data.type ? `Error: ${data.type}` : "Invalid token or password.");
+            updateLoginStatus(data.type ? `${t("errorPrefix")}${data.type}` : t("invalidTokenOrPassword"));
             resetUI();
         }
     } catch (error) {
         console.error("Password confirm failed:", error);
-        updateLoginStatus("Server connection failed.");
+        updateLoginStatus(t("serverConnectionFailed"));
         resetUI();
     }
 }
@@ -248,6 +263,27 @@ function setLoading(loading) {
 function resetUI() {
     setLoading(false);
 }
+
+document.addEventListener("DOMContentLoaded", () => {
+    const langSelect = document.getElementById("loginLanguageSelect");
+    if (langSelect) {
+        // 1. Sync dropdown with stored language
+        langSelect.value = currentLang();
+
+        // 2. Listen for user selecting a new language
+        langSelect.addEventListener("change", (e) => {
+            localStorage.setItem("preferred_lang", e.target.value);
+            if (typeof updatePageTranslations === "function") {
+                updatePageTranslations();
+            }
+        });
+    }
+
+    // Run translations on initial load
+    if (typeof updatePageTranslations === "function") {
+        updatePageTranslations();
+    }
+});
 
 // Event Listeners for Keyboard Controls
 [usernameInput, passwordInput, tokenInput, newPasswordInput].forEach((input) => {

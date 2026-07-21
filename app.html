@@ -15,7 +15,9 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&amp;display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&amp;display=swap"
+        rel="stylesheet">
 </head>
 
 <body>
@@ -31,19 +33,22 @@
         </div>
 
         <div id="electron-controls" class="titlebar-controls">
-            <button id="min-btn" aria-label="Minimize">−</button>
-            <button id="max-btn" aria-label="Maximize">□</button>
-            <button id="close-btn" class="close" aria-label="Close">✕</button>
+            <button id="min-btn" aria-label="Minimize" data-i18n-title="minimize">−</button>
+            <button id="max-btn" aria-label="Maximize" data-i18n-title="maximize">□</button>
+            <button id="close-btn" class="close" aria-label="Close" data-i18n-title="close">✕</button>
         </div>
     </header>
 
     <div class="app-container">
 
         <div class="sidebar-servers">
-            <button class="server-btn"><img class="server-btn-img" src="/images/newLogo256.png" alt="Server Logo"></button>
-            <a class="server-btn" title="Home" href="//mistedwafflez.com" target="_blank"><img class="server-btn-img" alt="Home" src="//mistedwafflez.com/pfp.jpg"></a>
+            <button class="server-btn"><img class="server-btn-img" src="/images/newLogo256.png"
+                    alt="Server Logo"></button>
+            <a class="server-btn" title="Home" href="//mistedwafflez.com" target="_blank"><img class="server-btn-img"
+                    alt="Home" src="//mistedwafflez.com/pfp.jpg"></a>
             <div class="sidebar-divider"></div>
-            <button class="server-btn" style="display: none;"><img src="/images/buffer40.gif" class="server-btn-img" alt="Buffer"></button>
+            <button class="server-btn" style="display: none;"><img src="/images/buffer40.gif" class="server-btn-img"
+                    alt="Buffer"></button>
             <button class="server-btn"><img class="server-btn-img" src="/images/iconNew.png" alt="Add Server"></button>
             <button class="server-btn"><img class="server-btn-img" src="/images/iconNav.png" alt="Explore"></button>
         </div>
@@ -51,12 +56,12 @@
         <div class="sidebar-channels">
             <div id="sidebarHeaderContainer">
                 <div class="search-container">
-                    <input class="search-input" placeholder="Find or start a conversation">
+                    <input class="search-input" placeholder="Find or start a conversation" data-i18n-placeholder="findOrStartConversation">
                 </div>
 
                 <button class="button2 button2-small" onclick="openFriendsDashboard()">
                     <div class="friends-icon"></div>
-                    <div class="friends-text">Friends</div>
+                    <div class="friends-text" data-i18n="friends">Friends</div>
                 </button>
             </div>
 
@@ -72,44 +77,56 @@
                         </div>
                     </button>
                     <div class="user-text-details">
-                        <div id="displayNameDisplay" class="user-display-name">Username</div>
-                        <div id="statusDisplay" class="user-status-subtext">Online</div>
+                        <div id="displayNameDisplay" class="user-display-name" data-i18n="username">Username</div>
+                        <div id="statusDisplay" class="user-status-subtext" data-i18n="online">Online</div>
                     </div>
                 </div>
 
                 <div class="user-controls">
                     <button class="user-control-btn" title="Mute"><img src="/images/iconMic.png" alt="Mute"></button>
-                    <button class="user-control-btn" title="Deafen"><img src="/images/iconHeadphones.png" alt="Deafen"></button>
-                    <button id="openSettingsBtn" class="user-control-btn" title="Settings"><img src="/images/iconSettings.png" alt="Settings"></button>
+                    <button class="user-control-btn" title="Deafen"><img src="/images/iconHeadphones.png"
+                            alt="Deafen"></button>
+                    <button id="openSettingsBtn" class="user-control-btn" title="Settings" data-i18n-title="userSettings"><img
+                            src="/images/iconSettings.png" alt="Settings"></button>
                 </div>
             </div>
 
             <div id="settingsOverlay" class="settings-overlay">
                 <div class="settings-modal">
                     <div class="settings-sidebar">
-                        <div class="settings-menu-header">User Settings</div>
-                        <button class="settings-nav-item active">My Account</button>
-                        <div class="settings-divider"></div>
-                        <button id="logoutBtn" class="settings-nav-item btn-danger">
-                            Log Out
-                        </button>
+                        <div class="settings-menu-header" data-i18n="userSettings">User Settings</div>
+                        <button class="settings-nav-item active" data-i18n="myAccount">My Account</button>
+                        <button id="logoutBtn" class="settings-nav-item btn-danger" data-i18n="logOut">Log Out</button>
                     </div>
 
                     <div class="settings-content">
                         <div class="settings-header">
-                            <h2>My Account</h2>
-                            <button id="closeSettingsBtn" class="close-settings-btn" title="Close Settings (Esc)">✕</button>
+                            <h2 data-i18n="myAccount">My Account</h2>
+                            <button id="closeSettingsBtn" class="close-settings-btn"
+                                title="Close Settings (Esc)" data-i18n-title="close">✕</button>
                         </div>
 
                         <div class="settings-card">
                             <div class="settings-user-header">
                                 <div id="settingsAvatar" class="settings-avatar"></div>
                                 <div class="settings-user-info">
-                                    <span id="settingsUsername" class="settings-username">Username</span>
-                                    <span class="settings-subtext">Stoat Member</span>
+                                    <span id="settingsUsername" class="settings-username" data-i18n="username">Username</span>
+                                    <span class="settings-subtext" data-i18n="stoatMember">Stoat Member</span>
                                 </div>
                             </div>
                         </div>
+
+                        <div class="settings-section" style="margin-top: 20px;">
+                            <label for="localeSelect"
+                                style="display: block; margin-bottom: 8px; font-weight: 600; color: #f2f3f5; font-size: 14px;" data-i18n="languageRegion">Language
+                                & Region</label>
+                            <select id="localeSelect" onchange="setLocale(this.value)"
+                                style="width: 100%; padding: 10px; border-radius: 4px; background: #2b2d31; color: #fff; border: 1px solid #3f4147; font-size: 14px; outline: none; cursor: pointer;">
+                                <option value="en-US">English (US)</option>
+                                <option value="fr-CA">Français (Canada)</option>
+                            </select>
+                        </div>
+
                     </div>
                 </div>
             </div>
@@ -118,7 +135,7 @@
         <div class="chat-header-bar">
             <div class="chat-header-border-primary"></div>
             <div class="chat-header-icon"></div>
-            <div id="activeChannelTitle" class="chat-header-title">Select a conversation</div>
+            <div id="activeChannelTitle" class="chat-header-title" data-i18n="chat">Select a conversation</div>
         </div>
 
         <div id="messageChannelBox" class="center-chat-panel">
@@ -127,16 +144,16 @@
                 <div id="channelMessagesBox" class="messages-scroller"></div>
                 <div id="messageInputBar" class="message-input-bar">
                     <button id="channelAttachmentButton" class="attachment-btn"></button>
-                    <input id="channelTextInput" placeholder="Message..." class="chat-text-input">
+                    <input id="channelTextInput" placeholder="Message..." class="chat-text-input" data-i18n-placeholder="messagePlaceholder">
                 </div>
             </div>
 
             <div id="friendsViewLayout" class="friends-dashboard">
-                <h2 class="friends-title">Friends</h2>
-                <div class="friends-subtitle">Your direct networking dashboard framework.</div>
+                <h2 class="friends-title" data-i18n="friends">Friends</h2>
+                <div class="friends-subtitle" data-i18n="directNetworkingDashboard">Your direct networking dashboard framework.</div>
 
                 <div class="friends-roster-header">
-                    All Friends — <span id="friendsCountLabel">0</span>
+                    <span data-i18n="allFriends">All Friends</span> — <span id="friendsCountLabel">0</span>
                 </div>
                 <div id="friendsRosterBox" class="friends-roster-box"></div>
             </div>
@@ -144,7 +161,7 @@
         </div>
 
         <div class="sidebar-members">
-            <div class="members-header-label">Members</div>
+            <div class="members-header-label" data-i18n="members">Members</div>
             <div id="memberBoard"></div>
         </div>
 
@@ -152,7 +169,7 @@
 
     <div id="loadingContainer" class="loading-overlay">
         <img id="cLoadingIcon" src="/images/buffer120.gif" class="loading-icon" alt="Loading...">
-        <div id="cLoadingText" class="loading-text">Waiting</div>
+        <div id="cLoadingText" class="loading-text" data-i18n="loadingMessages">Waiting</div>
     </div>
 
     <div id="contextMenu" class="context-menu" style="display: none;"></div>

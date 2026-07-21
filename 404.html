@@ -21,22 +21,58 @@
 
     <header class="top-nav-wrapper">
         <div class="top-nav-inner">
-            <a href="index.html" class="brand-logo">Mocha</a>
+            <a href="/" class="brand-logo">Mocha</a>
         </div>
     </header>
 
     <main class="card">
         <div id="errorContainer">
             <div class="error-title">404</div>
-            <div class="error-subtitle">Looks like this page spilled or doesn't exist anymore.</div>
+            <div class="error-subtitle" data-i18n="pageNotFoundSubtitle">Looks like this page spilled or doesn't exist anymore.</div>
 
             <div class="error-actions">
-                <a href="/" class="btn-action">
+                <a href="/" class="btn-action" data-i18n="returnHome">
                     Return to Home
                 </a>
             </div>
         </div>
     </main>
+
+    <footer class="landing-footer">
+        <p class="disclaimer-text">
+            <strong data-i18n="note">Note:</strong>
+            <span data-i18n="disclaimerTextLanding">Mocha is an independent, third-party client for</span>
+            <a href="https://stoat.chat" target="_blank" rel="noopener noreferrer">stoat.chat</a>
+            <span data-i18n="disclaimerTextLandingPost">and is not officially affiliated with or endorsed by stoat.chat.</span>
+        </p>
+
+        <div class="footer-language-wrapper">
+            <select id="notFoundLanguageSelect" class="footer-language-select">
+                <option value="en-US">English (US)</option>
+                <option value="fr-CA">Français (Canada)</option>
+            </select>
+        </div>
+    </footer>
+
+    <script src="/scripts/i18n.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const langSelect = document.getElementById("notFoundLanguageSelect");
+            if (langSelect) {
+                langSelect.value = typeof currentLang === "function" ? currentLang() : "en-US";
+                langSelect.addEventListener("change", (e) => {
+                    localStorage.setItem("preferred_lang", e.target.value);
+                    if (typeof updatePageTranslations === "function") {
+                        updatePageTranslations();
+                    }
+                });
+            }
+
+            if (typeof updatePageTranslations === "function") {
+                updatePageTranslations();
+            }
+        });
+    </script>
 
 </body>
 </html>

@@ -1099,7 +1099,12 @@ button {
     font-size: 13px;
     color: #e3deda;
     line-height: 1.4;
-    white-space: pre-wrap
+    white-space: pre-wrap;
+    max-height: 200px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    word-break: break-word;
+    white-space: pre-wrap;
 }
 
 .user-profile-popout {

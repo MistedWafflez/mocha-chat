@@ -35,61 +35,69 @@
         </div>
 
         <div id="electron-controls" class="titlebar-controls" style="display: none;">
-            <button id="min-btn" aria-label="Minimize">−</button>
-            <button id="max-btn" aria-label="Maximize">□</button>
-            <button id="close-btn" class="close" aria-label="Close">✕</button>
+            <button id="min-btn" data-i18n-aria="minimize" aria-label="Minimize">−</button>
+            <button id="max-btn" data-i18n-aria="maximize" aria-label="Maximize">□</button>
+            <button id="close-btn" class="close" data-i18n-aria="close" aria-label="Close">✕</button>
         </div>
     </header>
 
     <main class="register-card">
         <div id="registerContainer">
-            <div class="register-title">Create an account</div>
+            <div class="register-title" data-i18n="createAccount">Create an account</div>
 
             <div class="form-group">
-                <div class="form-label">EMAIL <span class="required">*</span></div>
+                <div class="form-label">
+                    <span data-i18n="email">EMAIL</span> <span class="required">*</span>
+                </div>
                 <input id="emailInput" class="form-input" type="email" autocomplete="email" required />
             </div>
 
             <div class="form-group tight">
-                <div class="form-label">DISPLAY NAME</div>
+                <div class="form-label" data-i18n="displayName">DISPLAY NAME</div>
                 <input id="displayNameInput" class="form-input" type="text" autocomplete="nickname" />
             </div>
 
             <div class="form-group tight">
-                <div class="form-label">USERNAME <span class="required">*</span></div>
+                <div class="form-label">
+                    <span data-i18n="username">USERNAME</span> <span class="required">*</span>
+                </div>
                 <input id="usernameInput" class="form-input" type="text" autocomplete="username" required />
             </div>
 
             <div class="form-group tight">
-                <div class="form-label">PASSWORD <span class="required">*</span></div>
+                <div class="form-label">
+                    <span data-i18n="password">PASSWORD</span> <span class="required">*</span>
+                </div>
                 <input id="passwordInput" class="form-input" type="password" autocomplete="new-password" required />
             </div>
 
             <div class="form-group tight">
-                <div class="form-label">DATE OF BIRTH <span class="required">*</span></div>
+                <div class="form-label">
+                    <span data-i18n="dateOfBirth">DATE OF BIRTH</span> <span class="required">*</span>
+                </div>
                 <div class="dob-select-group">
                     <select id="dobMonth" class="form-select" aria-label="Month" required>
-                        <option value="" disabled selected hidden>Month</option>
-                        <option value="1">January</option>
-                        <option value="2">February</option>
-                        <option value="3">March</option>
-                        <option value="4">April</option>
-                        <option value="5">May</option>
-                        <option value="6">June</option>
-                        <option value="7">July</option>
-                        <option value="8">August</option>
-                        <option value="9">September</option>
-                        <option value="10">October</option>
-                        <option value="11">November</option>
-                        <option value="12">December</option>
+                        <option value="" disabled selected hidden data-i18n="month">Month</option>
+                        <option value="1" data-i18n="january">January</option>
+                        <option value="2" data-i18n="february">February</option>
+                        <option value="3" data-i18n="march">March</option>
+                        <option value="4" data-i18n="april">April</option>
+                        <option value="5" data-i18n="may">May</option>
+                        <option value="6" data-i18n="june">June</option>
+                        <option value="7" data-i18n="july">July</option>
+                        <option value="8" data-i18n="august">August</option>
+                        <option value="9" data-i18n="september">September</option>
+                        <option value="10" data-i18n="october">October</option>
+                        <option value="11" data-i18n="november">November</option>
+                        <option value="12" data-i18n="december">December</option>
                     </select>
 
                     <select id="dobDay" class="form-select" aria-label="Day" required>
-                        <option value="" disabled selected hidden>Day</option>
+                        <option value="" disabled selected hidden data-i18n="day">Day</option>
                     </select>
 
                     <select id="dobYear" class="form-select" aria-label="Year" required>
-                        <option value="" disabled selected hidden>Year</option>
+                        <option value="" disabled selected hidden data-i18n="year">Year</option>
                     </select>
                 </div>
             </div>
@@ -97,17 +105,17 @@
             <div id="registerStatusMessage" class="status-message" style="display: none;"></div>
 
             <div class="form-group actions">
-                <button id="registerButton" class="btn-primary">Continue</button>
+                <button id="registerButton" class="btn-primary" data-i18n="continueBtn">Continue</button>
 
                 <div class="terms-notice">
-                    By registering, you agree to stoat.chat's
-                    <a href="https://stoat.chat/terms" target="_blank" rel="noopener noreferrer">Terms of Service</a>
-                    and
-                    <a href="https://stoat.chat/privacy" target="_blank" rel="noopener noreferrer">Privacy Policy</a>.
+                    <span data-i18n="termsNoticePre">By registering, you agree to stoat.chat's</span>
+                    <a href="https://stoat.chat/terms" target="_blank" rel="noopener noreferrer" data-i18n="termsOfService">Terms of Service</a>
+                    <span data-i18n="and">and</span>
+                    <a href="https://stoat.chat/privacy" target="_blank" rel="noopener noreferrer" data-i18n="privacyPolicy">Privacy Policy</a>.
                 </div>
 
                 <div class="footer-text">
-                    <a href="login">Already have an account?</a>
+                    <a href="login" data-i18n="alreadyHaveAccount">Already have an account?</a>
                 </div>
             </div>
         </div>
@@ -116,14 +124,22 @@
             alt="Loading..." style="display: none;" />
     </main>
 
+    <script src="/scripts/i18n.js"></script>
     <script src="/scripts/register.js"></script>
     <script src="/scripts/titlebar.js"></script>
 
     <footer class="landing-footer">
         <p class="disclaimer-text">
-            <strong>Note:</strong> Mocha is a third-party client for <a href="https://stoat.chat" target="_blank"
-                rel="noopener noreferrer">stoat.chat</a>.
+            <strong data-i18n="note">Note:</strong> <span data-i18n="disclaimerText">Mocha is a third-party client for</span>
+            <a href="https://stoat.chat" target="_blank" rel="noopener noreferrer">stoat.chat</a>.
         </p>
+
+        <div class="footer-language-wrapper">
+            <select id="registerLanguageSelect" class="footer-language-select">
+                <option value="en-US">English (US)</option>
+                <option value="fr-CA">Français (Canada)</option>
+            </select>
+        </div>
     </footer>
 
 </body>

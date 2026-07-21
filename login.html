@@ -35,37 +35,39 @@
         </div>
 
         <div id="electron-controls" class="titlebar-controls" style="display: none;">
-            <button id="min-btn" aria-label="Minimize">−</button>
-            <button id="max-btn" aria-label="Maximize">□</button>
-            <button id="close-btn" class="close" aria-label="Close">✕</button>
+            <button id="min-btn" data-i18n-aria="minimize" aria-label="Minimize">−</button>
+            <button id="max-btn" data-i18n-aria="maximize" aria-label="Maximize">□</button>
+            <button id="close-btn" class="close" data-i18n-aria="close" aria-label="Close">✕</button>
         </div>
     </header>
 
     <main class="login-card">
         <div id="loginContainer">
-            <div id="cardTitle" class="login-title">Welcome back!</div>
-            <div id="cardSubtitle" class="login-subtitle">Glad to see you around!</div>
+            <div id="cardTitle" class="login-title" data-i18n="welcomeBack">Welcome back!</div>
+            <div id="cardSubtitle" class="login-subtitle" data-i18n="loginSubtitle">Glad to see you around!</div>
 
             <div class="form-group" id="emailGroup">
-                <div class="form-label" id="emailLabel">EMAIL</div>
+                <div class="form-label" id="emailLabel" data-i18n="email">EMAIL</div>
                 <input id="usernameInput" class="form-input" type="text" autocomplete="email" />
             </div>
 
             <div class="form-group tight" id="passwordGroup">
-                <div class="form-label">PASSWORD</div>
+                <div class="form-label" data-i18n="password">PASSWORD</div>
                 <input id="passwordInput" class="form-input" type="password" autocomplete="current-password" />
                 <div class="sub-link-text">
-                    <a href="#" id="forgotPasswordLink" onclick="showForgotPasswordUI(event)">Forgot your password?</a>
+                    <a href="#" id="forgotPasswordLink" onclick="showForgotPasswordUI(event)"
+                        data-i18n="forgotPassword">Forgot your password?</a>
                 </div>
             </div>
 
             <div class="form-group tight" id="tokenGroup" style="display: none;">
-                <div class="form-label">RESET / VERIFICATION TOKEN</div>
-                <input id="tokenInput" class="form-input" type="text" placeholder="Enter code from email" />
+                <div class="form-label" data-i18n="resetVerificationToken">RESET / VERIFICATION TOKEN</div>
+                <input id="tokenInput" class="form-input" type="text" data-i18n-placeholder="enterCodeFromEmail"
+                    placeholder="Enter code from email" />
             </div>
 
             <div class="form-group tight" id="newPasswordGroup" style="display: none;">
-                <div class="form-label">NEW PASSWORD</div>
+                <div class="form-label" data-i18n="newPassword">NEW PASSWORD</div>
                 <input id="newPasswordInput" class="form-input" type="password" />
             </div>
 
@@ -74,13 +76,16 @@
             </div>
 
             <div class="form-group actions">
-                <button id="loginButton" class="btn-primary" onclick="handlePrimaryAction()">Login</button>
+                <button id="loginButton" class="btn-primary" onclick="handlePrimaryAction()"
+                    data-i18n="loginBtn">Login</button>
 
                 <div class="footer-text" id="footerText">
-                    Need an account? <a href="register">Register</a>
+                    <span data-i18n="needAccount">Need an account?</span>
+                    <a href="register" data-i18n="register">Register</a>
                 </div>
                 <div class="footer-text" id="backToLoginText" style="display: none;">
-                    Remembered it? <a href="#" onclick="showLoginUI(event)">Back to Login</a>
+                    <span data-i18n="rememberedIt">Remembered it?</span>
+                    <a href="#" onclick="showLoginUI(event)" data-i18n="backToLogin">Back to Login</a>
                 </div>
             </div>
         </div>
@@ -89,14 +94,23 @@
             alt="Loading..." style="display: none;" />
     </main>
 
+    <script src="/scripts/i18n.js"></script>
     <script src="/scripts/login.js"></script>
     <script src="/scripts/titlebar.js"></script>
 
     <footer class="landing-footer">
         <p class="disclaimer-text">
-            <strong>Note:</strong> Mocha is a third-party client for <a href="https://stoat.chat" target="_blank"
-                rel="noopener noreferrer">stoat.chat</a>.
+            <strong data-i18n="note">Note:</strong> <span data-i18n="disclaimerText">Mocha is a third-party client
+                for</span>
+            <a href="https://stoat.chat" target="_blank" rel="noopener noreferrer">stoat.chat</a>.
         </p>
+
+        <div class="footer-language-wrapper">
+            <select id="loginLanguageSelect" class="footer-language-select">
+                <option value="en-US">English (US)</option>
+                <option value="fr-CA">Français (Canada)</option>
+            </select>
+        </div>
     </footer>
 
 </body>

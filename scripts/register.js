@@ -1,4 +1,4 @@
-const STOAT_API_URL = "https://api.revolt.chat";
+const STOAT_API_URL = "https://stoat.chat/api";
 
 const emailInput = document.getElementById("emailInput");
 const displayNameInput = document.getElementById("displayNameInput");
@@ -53,7 +53,7 @@ async function submitRegister() {
     const password = passwordInput.value;
 
     if (!email || !username || !password) {
-        updateStatus("Email, Username, and Password are required.");
+        updateStatus(t("emailUsernamePasswordRequired"));
         return;
     }
 
@@ -94,16 +94,16 @@ async function submitRegister() {
         const data = await response.json();
 
         if (response.ok) {
-            // Redirect to login page or app once created
+            // Redirect to login page once created
             window.location.href = "/login?registered=true";
         } else {
-            const errorMsg = data.type ? `Error: ${data.type}` : "Failed to create account.";
+            const errorMsg = data.type ? `${t("errorPrefix")}${data.type}` : t("failedCreateAccount");
             updateStatus(errorMsg);
             resetUI();
         }
     } catch (error) {
         console.error("Registration failed:", error);
-        updateStatus("Server connection failed.");
+        updateStatus(t("serverConnectionFailed"));
         resetUI();
     }
 }
@@ -117,3 +117,21 @@ function resetUI() {
 if (registerButton) {
     registerButton.addEventListener("click", submitRegister);
 }
+
+// Language Dropdown Sync & Initialization
+document.addEventListener("DOMContentLoaded", () => {
+    const langSelect = document.getElementById("registerLanguageSelect");
+    if (langSelect) {
+        langSelect.value = typeof currentLang === "function" ? currentLang() : "en-US";
+        langSelect.addEventListener("change", (e) => {
+            localStorage.setItem("preferred_lang", e.target.value);
+            if (typeof updatePageTranslations === "function") {
+                updatePageTranslations();
+            }
+        });
+    }
+
+    if (typeof updatePageTranslations === "function") {
+        updatePageTranslations();
+    }
+});

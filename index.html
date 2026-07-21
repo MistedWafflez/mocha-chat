@@ -25,7 +25,7 @@
             <div class="brand-logo">Mocha</div>
 
             <a href="/login">
-                <div class="nav-btn nav-btn-primary">Open Mocha</div>
+                <div class="nav-btn nav-btn-primary" data-i18n="openMocha">Open Mocha</div>
             </a>
 
             <a href="//mistedwafflez.com">
@@ -33,20 +33,46 @@
             </a>
 
             <a href="/download">
-                <div class="nav-btn nav-btn-secondary">Download</div>
+                <div class="nav-btn nav-btn-secondary" data-i18n="download">Download</div>
             </a>
         </div>
     </header>
 
-</body>
-<footer class="landing-footer">
-    <p class="disclaimer-text">
-        <strong>Note:</strong> Mocha is an independent, third-party client for <a href="https://stoat.chat"
-            target="_blank" rel="noopener noreferrer">stoat.chat</a> and is not officially affiliated with or endorsed
-        by stoat.chat.
-    </p>
-</footer>
-</body>
+    <footer class="landing-footer">
+        <p class="disclaimer-text">
+            <strong data-i18n="note">Note:</strong>
+            <span data-i18n="disclaimerTextLanding">Mocha is an independent, third-party client for</span>
+            <a href="https://stoat.chat" target="_blank" rel="noopener noreferrer">stoat.chat</a>
+            <span data-i18n="disclaimerTextLandingPost">and is not officially affiliated with or endorsed by stoat.chat.</span>
+        </p>
+
+        <div class="footer-language-wrapper">
+            <select id="indexLanguageSelect" class="footer-language-select">
+                <option value="en-US">English (US)</option>
+                <option value="fr-CA">Français (Canada)</option>
+            </select>
+        </div>
+    </footer>
+
+    <script src="/scripts/i18n.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const langSelect = document.getElementById("indexLanguageSelect");
+            if (langSelect) {
+                langSelect.value = typeof currentLang === "function" ? currentLang() : "en-US";
+                langSelect.addEventListener("change", (e) => {
+                    localStorage.setItem("preferred_lang", e.target.value);
+                    if (typeof updatePageTranslations === "function") {
+                        updatePageTranslations();
+                    }
+                });
+            }
+
+            if (typeof updatePageTranslations === "function") {
+                updatePageTranslations();
+            }
+        });
+    </script>
 
 </body>
 
