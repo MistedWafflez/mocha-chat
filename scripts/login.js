@@ -118,16 +118,31 @@ async function submitLogin() {
     setLoading(true);
 
     try {
+        function getPlatformName() {
+            if (!window.electronAPI) return "Web";
+
+            const platform = window.electronAPI.platform;
+            switch (platform) {
+                case 'win32': return 'Windows';
+                case 'darwin': return 'macOS';
+                case 'linux': return 'Linux';
+                default: return 'Desktop';
+            }
+        }
+
+        const clientName = window.electronAPI
+            ? `Mocha Electron Client (${getPlatformName()})`
+            : "Mocha Web Client";
+
         const response = await fetch(`${STOAT_API_URL}/auth/session/login`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 email: identity,
                 password: password,
-                friendly_name: "Mocha Web Client"
+                friendly_name: clientName
             })
         });
-
         const data = await response.json();
 
         if (response.ok && data.token) {

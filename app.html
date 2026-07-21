@@ -15,123 +15,139 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&amp;display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&amp;display=swap" rel="stylesheet">
 </head>
 
 <body>
 
-    <div class="sidebar-servers">
-        <button class="server-btn"><img class="server-btn-img" src="/images/newLogo256.png" alt="Server Logo"></button>
-        <a class="server-btn" title="Home" href="//mistedwafflez.com" target="_blank"><img class="server-btn-img" alt="Home" src="//mistedwafflez.com/pfp.jpg"></a>
-        <div class="sidebar-divider"></div>
-        <button class="server-btn" style="display: none;"><img src="/images/buffer40.gif" class="server-btn-img"
-                alt="Buffer"></button>
-        <button class="server-btn"><img class="server-btn-img" src="/images/iconNew.png" alt="Add Server"></button>
-        <button class="server-btn"><img class="server-btn-img" src="/images/iconNav.png" alt="Explore"></button>
-    </div>
-
-    <div class="sidebar-channels">
-        <div id="sidebarHeaderContainer">
-            <div class="search-container">
-                <input class="search-input" placeholder="Find or start a conversation">
+    <header class="top-nav-wrapper custom-titlebar">
+        <div class="top-nav-inner titlebar-drag-area">
+            <div class="brand-logo">
+                <a href="#">
+                    <img src="/images/newLogo256.png" class="titlebar-icon" alt="" onerror="this.style.display='none'">
+                    <span>Mocha</span>
+                </a>
             </div>
-
-            <button class="button2 button2-small" onclick="openFriendsDashboard()">
-                <div class="friends-icon"></div>
-                <div class="friends-text">Friends</div>
-            </button>
         </div>
 
-        <div class="channel-list-divider"></div>
+        <div id="electron-controls" class="titlebar-controls">
+            <button id="min-btn" aria-label="Minimize">−</button>
+            <button id="max-btn" aria-label="Maximize">□</button>
+            <button id="close-btn" class="close" aria-label="Close">✕</button>
+        </div>
+    </header>
 
-        <div id="chatsList" class="chats-scroller"></div>
+    <div class="app-container">
 
-        <div class="user-panel">
-            <div class="user-info">
-                <button id="profileNavigationButtom" class="user-avatar-btn">
-                    <div class="user-status-wrapper">
-                        <div id="statusIndicatorCircle" class="user-status-dot"></div>
-                    </div>
+        <div class="sidebar-servers">
+            <button class="server-btn"><img class="server-btn-img" src="/images/newLogo256.png" alt="Server Logo"></button>
+            <a class="server-btn" title="Home" href="//mistedwafflez.com" target="_blank"><img class="server-btn-img" alt="Home" src="//mistedwafflez.com/pfp.jpg"></a>
+            <div class="sidebar-divider"></div>
+            <button class="server-btn" style="display: none;"><img src="/images/buffer40.gif" class="server-btn-img" alt="Buffer"></button>
+            <button class="server-btn"><img class="server-btn-img" src="/images/iconNew.png" alt="Add Server"></button>
+            <button class="server-btn"><img class="server-btn-img" src="/images/iconNav.png" alt="Explore"></button>
+        </div>
+
+        <div class="sidebar-channels">
+            <div id="sidebarHeaderContainer">
+                <div class="search-container">
+                    <input class="search-input" placeholder="Find or start a conversation">
+                </div>
+
+                <button class="button2 button2-small" onclick="openFriendsDashboard()">
+                    <div class="friends-icon"></div>
+                    <div class="friends-text">Friends</div>
                 </button>
-                <div class="user-text-details">
-                    <div id="displayNameDisplay" class="user-display-name">Username</div>
-                    <div id="statusDisplay" class="user-status-subtext">Online</div>
-                </div>
             </div>
 
-            <div class="user-controls">
-                <button class="user-control-btn" title="Mute"><img src="/images/iconMic.png" alt="Mute"></button>
-                <button class="user-control-btn" title="Deafen"><img src="/images/iconHeadphones.png"
-                        alt="Deafen"></button>
-                <button id="openSettingsBtn" class="user-control-btn" title="Settings"><img
-                        src="/images/iconSettings.png" alt="Settings"></button>
-            </div>
-        </div>
+            <div class="channel-list-divider"></div>
 
-        <div id="settingsOverlay" class="settings-overlay">
-            <div class="settings-modal">
-                <div class="settings-sidebar">
-                    <div class="settings-menu-header">User Settings</div>
-                    <button class="settings-nav-item active">My Account</button>
-                    <div class="settings-divider"></div>
-                    <button id="logoutBtn" class="settings-nav-item btn-danger">
-                        Log Out
+            <div id="chatsList" class="chats-scroller"></div>
+
+            <div class="user-panel">
+                <div class="user-info">
+                    <button id="profileNavigationButtom" class="user-avatar-btn">
+                        <div class="user-status-wrapper">
+                            <div id="statusIndicatorCircle" class="user-status-dot"></div>
+                        </div>
                     </button>
+                    <div class="user-text-details">
+                        <div id="displayNameDisplay" class="user-display-name">Username</div>
+                        <div id="statusDisplay" class="user-status-subtext">Online</div>
+                    </div>
                 </div>
 
-                <div class="settings-content">
-                    <div class="settings-header">
-                        <h2>My Account</h2>
-                        <button id="closeSettingsBtn" class="close-settings-btn" title="Close Settings (Esc)">✕</button>
+                <div class="user-controls">
+                    <button class="user-control-btn" title="Mute"><img src="/images/iconMic.png" alt="Mute"></button>
+                    <button class="user-control-btn" title="Deafen"><img src="/images/iconHeadphones.png" alt="Deafen"></button>
+                    <button id="openSettingsBtn" class="user-control-btn" title="Settings"><img src="/images/iconSettings.png" alt="Settings"></button>
+                </div>
+            </div>
+
+            <div id="settingsOverlay" class="settings-overlay">
+                <div class="settings-modal">
+                    <div class="settings-sidebar">
+                        <div class="settings-menu-header">User Settings</div>
+                        <button class="settings-nav-item active">My Account</button>
+                        <div class="settings-divider"></div>
+                        <button id="logoutBtn" class="settings-nav-item btn-danger">
+                            Log Out
+                        </button>
                     </div>
 
-                    <div class="settings-card">
-                        <div class="settings-user-header">
-                            <div id="settingsAvatar" class="settings-avatar"></div>
-                            <div class="settings-user-info">
-                                <span id="settingsUsername" class="settings-username">Username</span>
-                                <span class="settings-subtext">Stoat Member</span>
+                    <div class="settings-content">
+                        <div class="settings-header">
+                            <h2>My Account</h2>
+                            <button id="closeSettingsBtn" class="close-settings-btn" title="Close Settings (Esc)">✕</button>
+                        </div>
+
+                        <div class="settings-card">
+                            <div class="settings-user-header">
+                                <div id="settingsAvatar" class="settings-avatar"></div>
+                                <div class="settings-user-info">
+                                    <span id="settingsUsername" class="settings-username">Username</span>
+                                    <span class="settings-subtext">Stoat Member</span>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <div class="chat-header-bar">
-        <div class="chat-header-border-primary"></div>
-        <div class="chat-header-icon"></div>
-        <div id="activeChannelTitle" class="chat-header-title">Select a conversation</div>
-    </div>
-
-    <div id="messageChannelBox" class="center-chat-panel">
-
-        <div id="activeChatLayout" style="display: none; height: 100%; position: relative; width: 100%;">
-            <div id="channelMessagesBox" class="messages-scroller"></div>
-            <div id="messageInputBar" class="message-input-bar">
-                <button id="channelAttachmentButton" class="attachment-btn"></button>
-                <input id="channelTextInput" placeholder="Message..." class="chat-text-input">
-            </div>
+        <div class="chat-header-bar">
+            <div class="chat-header-border-primary"></div>
+            <div class="chat-header-icon"></div>
+            <div id="activeChannelTitle" class="chat-header-title">Select a conversation</div>
         </div>
 
-        <div id="friendsViewLayout" class="friends-dashboard">
-            <h2 class="friends-title">Friends</h2>
-            <div class="friends-subtitle">Your direct networking dashboard framework.</div>
+        <div id="messageChannelBox" class="center-chat-panel">
 
-            <div class="friends-roster-header">
-                All Friends — <span id="friendsCountLabel">0</span>
+            <div id="activeChatLayout" style="display: none; height: 100%; position: relative; width: 100%;">
+                <div id="channelMessagesBox" class="messages-scroller"></div>
+                <div id="messageInputBar" class="message-input-bar">
+                    <button id="channelAttachmentButton" class="attachment-btn"></button>
+                    <input id="channelTextInput" placeholder="Message..." class="chat-text-input">
+                </div>
             </div>
-            <div id="friendsRosterBox" class="friends-roster-box"></div>
+
+            <div id="friendsViewLayout" class="friends-dashboard">
+                <h2 class="friends-title">Friends</h2>
+                <div class="friends-subtitle">Your direct networking dashboard framework.</div>
+
+                <div class="friends-roster-header">
+                    All Friends — <span id="friendsCountLabel">0</span>
+                </div>
+                <div id="friendsRosterBox" class="friends-roster-box"></div>
+            </div>
+
         </div>
 
-    </div>
+        <div class="sidebar-members">
+            <div class="members-header-label">Members</div>
+            <div id="memberBoard"></div>
+        </div>
 
-    <div class="sidebar-members">
-        <div class="members-header-label">Members</div>
-        <div id="memberBoard"></div>
     </div>
 
     <div id="loadingContainer" class="loading-overlay">
@@ -139,7 +155,6 @@
         <div id="cLoadingText" class="loading-text">Waiting</div>
     </div>
 
-    <script src="/scripts/app.js"></script>
     <div id="contextMenu" class="context-menu" style="display: none;"></div>
     <div id="customModalOverlay" class="modal-overlay" style="display: none;">
         <div class="modal-card">
@@ -147,12 +162,13 @@
                 <h3 id="modalTitle">Modal Title</h3>
                 <button class="modal-close-btn" onclick="closeCustomModal()">✕</button>
             </div>
-            <div class="modal-body" id="modalBody">
-                </div>
-            <div class="modal-actions" id="modalActions">
-                </div>
+            <div class="modal-body" id="modalBody"></div>
+            <div class="modal-actions" id="modalActions"></div>
         </div>
     </div>
+
+    <script src="/scripts/app.js"></script>
+    <script src="/scripts/appTitlebar.js"></script>
 </body>
 
 </html>

@@ -24,9 +24,20 @@
 
 <body>
 
-    <header class="top-nav-wrapper">
-        <div class="top-nav-inner">
-            <div class="brand-logo"><a href="/">Mocha</a></div>
+    <header class="top-nav-wrapper custom-titlebar">
+        <div class="top-nav-inner titlebar-drag-area">
+            <div class="brand-logo">
+                <a href="/">
+                    <img src="favicon.ico" class="titlebar-icon" alt="" onerror="this.style.display='none'">
+                    Mocha
+                </a>
+            </div>
+        </div>
+
+        <div id="electron-controls" class="titlebar-controls" style="display: none;">
+            <button id="min-btn" aria-label="Minimize">−</button>
+            <button id="max-btn" aria-label="Maximize">□</button>
+            <button id="close-btn" class="close" aria-label="Close">✕</button>
         </div>
     </header>
 
@@ -106,6 +117,7 @@
     </main>
 
     <script src="/scripts/register.js"></script>
+    <script src="/scripts/titlebar.js"></script>
 
     <footer class="landing-footer">
         <p class="disclaimer-text">

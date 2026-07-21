@@ -62,6 +62,22 @@ async function submitRegister() {
     if (registerContainer) registerContainer.style.display = "none";
 
     try {
+        function getPlatformName() {
+            if (!window.electronAPI) return "Web";
+
+            const platform = window.electronAPI.platform;
+            switch (platform) {
+                case 'win32': return 'Windows';
+                case 'darwin': return 'MacOS';
+                case 'linux': return 'Linux';
+                default: return 'Desktop';
+            }
+        }
+
+        const clientName = window.electronAPI
+            ? `Mocha Electron Client (${getPlatformName()})`
+            : "Mocha Web Client";
+
         const response = await fetch(`${STOAT_API_URL}/auth/account/create`, {
             method: "POST",
             headers: {
@@ -70,7 +86,8 @@ async function submitRegister() {
             body: JSON.stringify({
                 email: email,
                 username: username,
-                password: password
+                password: password,
+                friendly_name: clientName
             })
         });
 

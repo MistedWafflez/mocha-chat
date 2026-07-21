@@ -1,4 +1,6 @@
-*, *::before, *::after {
+*,
+*::before,
+*::after {
     box-sizing: border-box;
 }
 
@@ -242,7 +244,8 @@ a:hover {
     position: relative;
     overflow: hidden;
     border-radius: 8px;
-    top: calc(50% - 310px); /* adjusted vertical position for taller card */
+    top: calc(50% - 310px);
+    /* adjusted vertical position for taller card */
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
     border: 1px solid rgba(255, 255, 255, 0.05);
     padding-bottom: 12px;
@@ -298,4 +301,115 @@ a:hover {
 
 .terms-notice a {
     color: #ba8c63;
+}
+
+.top-nav-wrapper.custom-titlebar {
+    -webkit-app-region: drag;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    user-select: none;
+}
+
+.top-nav-inner a {
+    -webkit-app-region: no-drag;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.titlebar-icon {
+    width: 18px;
+    height: 18px;
+}
+
+.titlebar-controls {
+    -webkit-app-region: no-drag;
+    display: flex;
+    height: 100%;
+}
+
+.titlebar-controls button {
+    background: transparent;
+    border: none;
+    color: #b5bac1;
+    width: 44px;
+    height: 32px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.titlebar-controls button:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+}
+
+.titlebar-controls button.close:hover {
+    background: #f23f43;
+    color: #fff;
+}
+
+.custom-titlebar.is-electron {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 32px;
+    padding: 0 0 0 10px;
+    margin: 0;
+    -webkit-app-region: drag;
+}
+
+.custom-titlebar.is-electron .top-nav-inner,
+.custom-titlebar.is-electron .brand-logo {
+    display: flex;
+    align-items: center;
+    margin: 0;
+    padding: 0;
+}
+
+.custom-titlebar.is-electron .brand-logo a {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1;
+}
+
+.custom-titlebar.is-electron .brand-logo img,
+.custom-titlebar.is-electron .titlebar-icon {
+    width: 16px;
+    height: 16px;
+}
+
+.custom-titlebar.is-electron .titlebar-controls {
+    -webkit-app-region: no-drag;
+    display: flex;
+    height: 100%;
+}
+
+.custom-titlebar.is-electron .brand-logo a {
+    pointer-events: none;
+    cursor: default !important;
+    user-select: none;
+    text-decoration: none;
+    color: inherit;
+}
+
+.custom-titlebar.is-electron .brand-logo a:hover,
+.custom-titlebar.is-electron .brand-logo a:active,
+.custom-titlebar.is-electron .brand-logo a:focus {
+    color: inherit !important;
+    background: transparent !important;
+    opacity: 1 !important;
+}
+
+.custom-titlebar.is-electron .brand-logo,
+.custom-titlebar.is-electron .brand-logo a,
+.custom-titlebar.is-electron .brand-logo a:hover,
+.custom-titlebar.is-electron .brand-logo a:visited,
+.custom-titlebar.is-electron .brand-logo a:active {
+    color: #ba8c63 !important;
+    text-decoration: none !important;
 }

@@ -1808,3 +1808,115 @@ button {
     font-weight: 500;
     letter-spacing: -0.1px;
 }
+
+.custom-titlebar {
+    display: none;
+}
+
+body.is-electron .custom-titlebar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 32px;
+    width: 100%;
+    background-color: #12100e;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 0 0 0 10px;
+    margin: 0;
+    flex-shrink: 0;
+    -webkit-app-region: drag;
+    box-sizing: border-box;
+    user-select: none;
+}
+
+body.is-electron .custom-titlebar .top-nav-inner,
+body.is-electron .custom-titlebar .brand-logo {
+    display: flex;
+    align-items: center;
+    position: static !important;
+    float: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    height: auto !important;
+    line-height: 1 !important;
+}
+
+body.is-electron .custom-titlebar .brand-logo a {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none !important;
+    color: #f5efe9 !important;
+    pointer-events: none;
+    cursor: default !important;
+}
+
+body.is-electron .custom-titlebar .brand-logo img,
+body.is-electron .custom-titlebar .titlebar-icon {
+    width: 16px;
+    height: 16px;
+}
+
+body.is-electron .custom-titlebar .titlebar-controls {
+    -webkit-app-region: no-drag;
+    display: flex;
+    height: 100%;
+}
+
+body.is-electron .custom-titlebar .titlebar-controls button {
+    background: transparent;
+    border: none;
+    color: #b5bac1;
+    width: 44px;
+    height: 32px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+body.is-electron .custom-titlebar .titlebar-controls button:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+}
+
+body.is-electron .custom-titlebar .titlebar-controls button.close:hover {
+    background: #f23f43;
+    color: #fff;
+}
+
+body.is-electron {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    width: 100vw;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+body.is-electron .app-container {
+    display: flex;
+    position: relative;
+    width: 100%;
+    height: calc(100vh - 32px);
+    flex: 1;
+    overflow: hidden;
+}
+
+body.is-electron .sidebar-servers,
+body.is-electron .sidebar-channels,
+body.is-electron .center-chat-panel,
+body.is-electron .sidebar-members {
+    height: 100% !important;
+    max-height: 100% !important;
+    box-sizing: border-box;
+}
+
+body.is-electron .message-input-bar {
+    bottom: 50px;
+}
+
+body.is-electron #channelMessagesBox {
+    padding-bottom: 122px;
+}
